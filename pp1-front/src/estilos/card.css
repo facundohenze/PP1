@@ -1,0 +1,313 @@
+/* Estilos para la tarjeta - Optimizado para TV */
+.tarjeta {
+    display: flex;
+    flex-direction: column;
+    border: 3px solid #ccc;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px; 
+    background: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 500px;
+    max-width: 500px;
+    /* Limita el ancho máximo para pantallas grandes */
+}
+
+.tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    border-color: #A12A2A;
+}
+
+/* Imagen cuando la card está activa (con controles visibles) */
+.img-activa {
+  width: 150px;
+  height: auto;
+  margin: 10px auto;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+/* Imagen cuando la card está inactiva (más grande, centrada) */
+.img-inactiva {
+  width: 250px;   /*ajusta este tamaño a gusto */
+  height: auto;
+  margin: 30px auto;
+  display: block;
+  transition: all 0.3s ease;
+  
+}
+
+/* Estructura básica del contenido de la tarjeta */
+.tarjeta-contenido {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* Contenido específico para cards inactivas - títulos fijos arriba */
+.tarjeta.inactiva .tarjeta-contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Asegurar que el título esté siempre en la parte superior */
+.tarjeta.inactiva .tarjeta-contenido h3 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    order: 1; /* Asegura que esté primero */
+    font-size: 30px;
+}
+
+/* La descripción va después del título */
+.tarjeta.inactiva .tarjeta-contenido p {
+    margin-bottom: 15px;
+    order: 2; /* Asegura que esté segundo */
+    font-size: 20px;
+}
+
+/* La imagen va después de la descripción */
+.tarjeta.inactiva .tarjeta-contenido .img-inactiva {
+    order: 3; /* Asegura que esté tercero */
+    align-self: center;
+}
+
+.tarjeta-titulo {
+    margin: 0 0 15px 0;
+    font-size: 28px;
+    color: black;
+}
+
+.tarjeta-descripcion {
+    margin: 0 0 0 0;
+    font-size: 18px;
+    color: #555;
+    line-height: 1.4; 
+}
+
+.precio-base {
+    margin: 0 0 20px 0;
+    font-weight: bold;
+    font-size: 25px;
+    color: #28a745;
+}
+
+/* Controles de cantidad */
+.tarjeta-controles {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.cantidad-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 20px;
+}
+
+.cantidad-controls button {
+    background-color: #A12A2A;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 45px;
+    transition: background-color 0.3s ease;
+}
+
+.cantidad-controls button:hover {
+    background-color: #8B2323;
+}
+
+.cantidad-display {
+    margin: 0 15px;
+    font-size: 24px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.boton-confirmar {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    width: 100px;
+    height: 40px;
+}
+
+.boton-confirmar:hover {
+    background-color: #218838;
+}
+
+/* Estilos para botón deshabilitado */
+.boton-confirmar.deshabilitado {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.boton-confirmar.deshabilitado:hover {
+    background-color: #ccc;
+}
+
+.boton-cancelar {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    width: 100px;
+    height: 40px;
+}
+
+.boton-cancelar:hover {
+    background-color: #c82333;
+}
+
+.total-display {
+    font-size: 22px;
+    font-weight: bold;
+    color: #A12A2A;
+}
+
+/* Mensaje de selección de tamaño */
+.mensaje-seleccionar {
+    text-align: center;
+    padding: 8px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #856404;
+}
+
+/* Container para el grid de tarjetas */
+.grid-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    padding: 20px;
+    max-width: none;
+}
+
+/* Para pantallas muy grandes (TVs) */
+@media (min-width: 1920px) {
+    .carrito {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .tarjeta-titulo {
+        font-size: 32px;
+    }
+
+    .tarjeta-precio {
+        font-size: 36px;
+    }
+
+    .cantidad-controls {
+        font-size: 24px;
+    }
+
+    .cantidad-display {
+        font-size: 28px;
+    }
+}
+
+/* Para tablets horizontales */
+@media (max-width: 1200px) {
+    .carrito {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Para móviles */
+@media (max-width: 768px) {
+    .carrito {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .tarjeta-titulo {
+        font-size: 24px;
+    }
+
+    .tarjeta-precio {
+        font-size: 28px;
+    }
+}
+
+/* -------- PRECIOS DE TAMAÑO (inactiva) -------- */
+.tamano-precios {
+  display: flex;
+  justify-content: space-around;
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+.tamano-precios span {
+  background: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #28a745; /* verde como el precio base */
+}
+
+/* -------- SELECTOR DE TAMAÑO (activa) -------- */
+.tamano-selector {
+  margin: 0.5rem 0;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.tamano-selector button {
+  padding: 8px 14px;
+  border: 2px solid #aaa;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.tamano-selector button:hover {
+  background: #f8f9fa;
+}
+
+.tamano-selector button.activo {
+  background: #d1ffd1;
+  border-color: #28a745;
+  color: #155724;
+}

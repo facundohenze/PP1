@@ -1,0 +1,14 @@
+.table {
+  width: 100%;
+  border-collapse: collapse; /* 👈 elimina espacio entre celdas */
+  font-size: 20px;           /* bajá un poco la fuente si lo ves muy grande */
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;  /* 👈 controla el espacio interno */
+}
+
+.table .columna {
+  background-color: #E9FF45;
+}

@@ -1,0 +1,169 @@
+/* Contenedor general */
+.edicion-contenedor {
+  padding: 20px;
+}
+
+/* Bloque de cada producto a editar */
+.producto-edicion {
+  margin-bottom: 40px;
+}
+
+/* Título */
+.titulo-edicion {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+/* Descripción */
+.descripcion-edicion {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* Tabla */
+.tabla-ingredientes {
+  float: left;
+  width: 50%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 25px;
+
+}
+
+.tabla-ingredientes th,
+.tabla-ingredientes td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.tabla-ingredientes th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.tabla-ingredientes tr:nth-child(even) {
+  background-color: #fdfdfd;
+}
+
+/* Mensaje cuando no hay productos */
+.mensaje-vacio {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+.boton-desplegar {
+  margin: 10px 0;
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.boton-desplegar:hover {
+  background-color: #218838;
+}
+
+.botones-cantidad {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 20px;
+}
+
+.botones-cantidad button {
+  background-color: #A12A2A;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 25px;
+  font-weight: bold;
+  min-width: 45px;
+  transition: background-color 0.3s ease;
+  margin-bottom: 5px;
+}
+
+.botones-cantidad button:hover {
+  background-color: #8B2323;
+}
+
+.cantidades {
+  margin: 0 15px;
+  font-size: 25px;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+
+}
+
+.total-producto {
+  font-size: 25px;
+}
+
+
+.botones{
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.guardarEdicion-btn {
+  height: 60px;
+  width: 300px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+  font-size: 18px;
+}
+
+.cancelarEdicion-btn {
+  height: 60px;
+  width: 300px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+  font-size: 18px;
+
+}
+
+/* Tabla */
+.tabla-extras {
+  float: right;
+  width: 50%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 25px;
+  
+}
+
+.tabla-extras th,
+.tabla-extras td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.tabla-extras th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.tabla-extras tr:nth-child(even) {
+  background-color: #fdfdfd;
+}

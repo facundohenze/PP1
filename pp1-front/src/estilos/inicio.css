@@ -1,0 +1,43 @@
+.inicio {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* ocupa toda la pantalla */
+    background-color: #772424;
+    align-items: center;
+}
+.logo img {
+    width: 600px;
+    height: auto;
+}
+.buttons {
+  display: flex;
+  justify-content: center; /* centra los botones */
+  gap: 40px;               /* espacio entre botones */
+  margin-top: 50px;
+}
+
+.buttons button {
+  background-color: #E9FF45;
+  border: none;
+  color: black;
+  border-radius: 30px;
+  font-size: 40px;
+  width: 400px;
+  height: 500px;
+  font-weight: bold;
+
+  display: flex;
+  flex-direction: column;   /* imagen arriba, texto abajo */
+  justify-content: center;
+  align-items: center;
+}
+
+.texto-boton {
+  font-size: 45px;
+  margin-top: 20px; /* espacio entre imagen y texto */
+}
+
+.buttons img {
+  width: 250px;
+  height: auto;
+}
