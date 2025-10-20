@@ -5,8 +5,7 @@
   gap: 15px;
   overflow-x: auto;
   padding: 10px;
-  align-items: flex-start;
-  
+  align-items: center;
 }
 
 .item-seleccion {
@@ -19,13 +18,18 @@
   border-radius: 15px;
   padding: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 18px;
 }
 
 .item-seleccion img {
   width: 60px;
   height: 60px;
   object-fit: contain;
-  
+}
+
+.item-seleccion .precio {
+  font-weight: bold;
+  color: #28a745;
 }
 
 .item-seleccion .cantidad {
@@ -34,6 +38,14 @@
 }
 
 .item-seleccion .nombre {
-  font-size: 0.8rem;
+  /* font-size: 0.8rem; */
   text-align: center;
 }
+
+.vacio{
+  color: white;
+  font-weight: bold;
+  font-size: 35px;
+  font-style: italic;
+}
+

@@ -41,6 +41,7 @@
   background: #A12A2A; /* color de fondo */
   color: black;
   overflow-x: auto;
+  height: 210px;
 }
 
 .footer-buttons {
@@ -69,12 +70,26 @@
 .layout-footer-carrito{
   flex: 0 0 auto;       /* footer ocupa su tamaño natural */
   display: flex;
-  justify-content: right;
+  justify-content: center;
+  align-items: center;
   gap: 20px;
   padding: 20px;
   background: #D9D9D9; /* color de fondo */
   color: black;
   height: 80px;
+}
+
+.mensaje-seleccionar2 {
+  text-align: justify;
+  padding: 8px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  margin: 0px 0;
+  font-size: 20px;
+  color: #856404;
+  height: 45px;
+    
 }
 
 .footer-buttons-carrito {
@@ -83,7 +98,7 @@
   justify-content: center;
   gap: 40px;
   padding: 20px;
-  background: #fff; /* color de fondo */
+  background: #A12A2A; /* color de fondo */
   height: 400px;
 }
 
@@ -111,3 +126,4 @@
   background-color: #4CAF50;
   color: white;
 }
+

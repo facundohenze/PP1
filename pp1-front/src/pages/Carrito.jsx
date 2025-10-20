@@ -44,15 +44,7 @@ export const Carrito = () => {
                                 <td>{item.nombre}</td>
                                 <td>{item.descripcion}</td>
                                 <td>
-                                    ${(
-                                        Number(
-                                            (
-                                                item.subtotal && Number(item.subtotal) > 0
-                                                    ? item.subtotal
-                                                    : item.precio
-                                            ).toString().replace(/[^0-9.]/g, "")
-                                        )
-                                    ).toFixed(2)}
+                                   {item.subtotal || item.precio}
                                 </td>
 
                             </tr>

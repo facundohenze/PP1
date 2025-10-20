@@ -8,15 +8,15 @@ export const Edicion2 = () => {
   const { register, unregister } = useContext(EdicionContext); // Registrar funciones para Layout
   const location = useLocation(); // Lee state pasado por Link
   const productoSeleccionado = location.state?.producto; // El producto enviado desde CardEdicion (si existe)
-
+  const [extrasDisponibles, setExtrasDisponibles] = useState([]);
   const [productos, setProductos] = useState([]); // Productos a editar en esta vista (puede ser 1 o varios)
   const [originales, setOriginales] = useState([]); // Copia para poder cancelar cambios
   const [loading, setLoading] = useState(true); // Indicador de carga
   const excluirIds = [1]; // Ejemplo: ids de ingredientes a excluir
 
-  const idsExtrasProd1 = [9,1013,14,15]; // IDs de ingredientes extra para el producto con id 1
-  const idsExtrasProd2 = [10,12,13,15]; // IDs de ingredientes extra para el producto con id 2
-  const idsExtrasProd3 = [8,9,10,11,12,13,15]; // IDs de ingredientes extra para el producto con id 3
+  const idsExtrasProd1 = [9, 10, 13, 14, 15]; // IDs de ingredientes extra para el producto con id 1
+  const idsExtrasProd2 = [10, 12, 13, 15]; // IDs de ingredientes extra para el producto con id 2
+  const idsExtrasProd3 = [8, 9, 10, 11, 12, 13, 15]; // IDs de ingredientes extra para el producto con id 3
 
   // Función para obtener los IDs de ingredientes extra según el ID del producto
 
@@ -26,6 +26,29 @@ export const Edicion2 = () => {
     if (productoSeleccionado?.id_producto ?? productoSeleccionado?.id) {
       const idProducto = productoSeleccionado.id_producto ?? productoSeleccionado.id;
 
+      let idsExtras = [];
+      if (idProducto === 1) idsExtras = idsExtrasProd1;
+      else if (idProducto === 2) idsExtras = idsExtrasProd2;
+      else if (idProducto === 3) idsExtras = idsExtrasProd3;
+
+      const fetchExtras = async () => {
+        try {
+          const res = await fetch("http://localhost:3000/api/ingredientes");
+          const data = await res.json();
+
+          if (data?.status === "OK" && Array.isArray(data.data)) {
+            // Filtrar solo los ingredientes que estén en idsExtras
+            const extrasFiltrados = data.data.filter((ing) =>
+              idsExtras.includes(ing.id_ingrediente)
+            );
+            setExtrasDisponibles(extrasFiltrados);
+          }
+        } catch (error) {
+          console.error("Error al obtener ingredientes extras:", error);
+        }
+      };
+
+      fetchExtras();
       // Si el producto ya trae ingredientes guardados, usarlos directamente
       if (Array.isArray(productoSeleccionado.ingredientes) && productoSeleccionado.ingredientes.length > 0) {
         const detalle = { ...productoSeleccionado };
@@ -108,7 +131,14 @@ export const Edicion2 = () => {
       } finally {
         setLoading(false);
       }
+
     })();
+
+
+    const idProducto = productoSeleccionado?.id_producto ?? productoSeleccionado?.id;
+    if (!idProducto) return;
+
+    // Seleccionar el array correspondiente
   }, [productoSeleccionado]); // Se vuelve a ejecutar si cambia el producto seleccionado
 
   // updateCantidad: modifica la cantidad de un ingrediente concreto
@@ -158,15 +188,18 @@ export const Edicion2 = () => {
             (acc, ing) => acc + Number(ing.precio || 0) * Number(ing.cantidad || 0),
             0
           );
-          return Number((s + 0.5).toFixed(2)); // sumar cargo fijo (ejemplo 0.5)
+          return `$${(s + 0.5).toFixed(2)}`; // sumar cargo fijo (ejemplo 0.5) y formatear con $
         }
-        if (prodEdit.subtotal) return Number(prodEdit.subtotal);
+        if (prodEdit.subtotal) {
+          const num = Number(String(prodEdit.subtotal).replace(/[^0-9.]/g, ""));
+          return `$${num.toFixed(2)}`;
+        }
         if (prodEdit.precio) {
           const p = Number(String(prodEdit.precio).replace(/[^0-9.]/g, ""));
           const cant = Number(prodEdit.cantidad || 1);
-          return Number((p * cant).toFixed(2));
+          return `$${(p * cant).toFixed(2)}`;
         }
-        return 0;
+        return "$0.00";
       })();
 
       if (idx === -1) {
@@ -229,9 +262,13 @@ export const Edicion2 = () => {
             <div className="tabla-wrapper">
               <table className="tabla-ingredientes">
                 <thead>
+                  <tr className="titulo-tabla">
+                    <th colspan="4">Ingredientes del producto</th>
+                  </tr>
+                  <br />
                   <tr>
                     <th style={{ width: "140px" }}>Cantidad</th>
-                    <th>Ingrediente</th>
+                    <th>Ingredientes</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -264,24 +301,59 @@ export const Edicion2 = () => {
                   </tr>
                 </tbody>
               </table>
-              <table className="tabla-extras" > 
-                  <thead>
+
+              <table className="tabla-extras">
+                <thead>
+                  <tr className="titulo-tabla">
+                    <th colSpan="3">Extras disponibles</th>
+                  </tr>
+                  <br />
                   <tr>
-                    <th style={{ width: "140px" }}>Cantidad</th>
-                    <th>Ingrediente</th>
+                    <th>Ingredientes</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  
-
-
-
-
-
+                  {extrasDisponibles.length > 0 ? (
+                    extrasDisponibles.map((extra) => (
+                      <tr key={extra.id_ingrediente}>
+                        <td>{extra.nombre}</td>
+                        {/* <td>${Number(extra.precio).toFixed(2)}</td> */}
+                        <td>
+                          <button
+                            className="boton-agregar-extra"
+                            onClick={() => {
+                              setProductos((prev) =>
+                                prev.map((prod, pIdx) => {
+                                  if (pIdx !== idx) return prod;
+                                  const yaExiste = prod.ingredientes.some(
+                                    (ing) => ing.id_ingrediente === extra.id_ingrediente
+                                  );
+                                  if (yaExiste) return prod; // evitar duplicados
+                                  return {
+                                    ...prod,
+                                    ingredientes: [
+                                      ...prod.ingredientes,
+                                      { ...extra, cantidad: 1 },
+                                    ],
+                                  };
+                                })
+                              );
+                            }}
+                          >
+                            Agregar
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3} style={{ textAlign: "center", opacity: 0.6 }}>
+                        No hay extras disponibles
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
-
-
-
               </table>
             </div>
           </div>

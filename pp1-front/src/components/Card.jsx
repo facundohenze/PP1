@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../estilos/card.css";
+import "../estilos/cardEdicion.css";
 
 export const Card = ({
   id,

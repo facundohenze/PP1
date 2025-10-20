@@ -55,7 +55,7 @@ export const Layout = ({ children }) => {
                         </Link>
                     </div>
                     <Link to="/Edicion">
-                        <button>Editar Seleccion</button>
+                        <button>Editar Selección</button>
                     </Link>
                     <div className="boton-aceptar-pedido">
                         <Link to="/Carrito">
@@ -67,6 +67,9 @@ export const Layout = ({ children }) => {
 
             {mostrar5 && (
                 <main className="layout-footer-carrito">
+                    <div className="mensaje-seleccionar2">
+                        <span>Selecciona un producto para editarlo</span>
+                    </div>
                 </main>
             )}
 
@@ -78,7 +81,7 @@ export const Layout = ({ children }) => {
                         </Link>
                     </div>
                     <Link to="/Productos">
-                        <button>Seleccionar Producto</button>
+                        <button>Menú</button>
                     </Link>
                     <div className="boton-aceptar-pedido">
                         <Link to="/Carrito">
@@ -145,6 +148,9 @@ export const Layout = ({ children }) => {
                             <button>Cancelar Pedido</button>
                         </Link>
                     </div>
+                    <Link to="/Productos">
+                        <button>Menú</button>
+                    </Link>
                     <div className="boton-aceptar-pedido">
                         <Link to="/Carrito">
                             <button>Confirmar Pedido</button>
