@@ -30,7 +30,7 @@ app.get('/db-test', async (req, res) => {
   try {
     // Testear la conexión
     const isConnected = await testConnection();
-    
+
     if (isConnected) {
       // Si la conexión es exitosa, obtener información de las tablas
       const tables = await sql`
@@ -39,7 +39,7 @@ app.get('/db-test', async (req, res) => {
         WHERE table_schema = 'public'
         ORDER BY table_name;
       `;
-      
+
       res.json({
         status: 'OK',
         message: 'Conexión exitosa a la base de datos',
@@ -70,7 +70,7 @@ app.get('/api/pedidos', async (req, res) => {
       SELECT * FROM pedidos
       ORDER BY fecha_hora DESC;
     `;
-    
+
     res.json({
       status: 'OK',
       data: pedidos
@@ -88,7 +88,7 @@ app.get('/api/pedidos', async (req, res) => {
 // 2. Obtener un pedido específico con detalles completos
 app.get('/api/pedidos/:id', async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     // Obtener la información del pedido con datos relacionados
     const pedido = await sql`
@@ -107,14 +107,14 @@ app.get('/api/pedidos/:id', async (req, res) => {
       LEFT JOIN estado_pedido ep ON p.id_estado = ep.id_estado
       WHERE p.id_pedido = ${id};
     `;
-    
+
     if (pedido.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el pedido con ID ${id}`
       });
     }
-    
+
     // Obtener los productos del pedido con sus detalles
     const productos = await sql`
       SELECT 
@@ -132,7 +132,7 @@ app.get('/api/pedidos/:id', async (req, res) => {
       JOIN categoriaproducto cp ON p.idcategoriaproducto = cp.idcategoriaproducto
       WHERE pp.id_pedido = ${id};
     `;
-    
+
     // Para cada producto, obtener los ingredientes personalizados
     const productosConIngredientes = await Promise.all(
       productos.map(async (producto) => {
@@ -149,14 +149,14 @@ app.get('/api/pedidos/:id', async (req, res) => {
           JOIN ingredientes i ON ppi.id_ingrediente = i.id_ingrediente
           WHERE ppi.id_pedido_producto = ${producto.id_pedido_producto};
         `;
-        
+
         return {
           ...producto,
           ingredientes_personalizados: ingredientes
         };
       })
     );
-    
+
     res.json({
       status: 'OK',
       data: {
@@ -177,7 +177,7 @@ app.get('/api/pedidos/:id', async (req, res) => {
 // 3. Crear un nuevo pedido (MODIFICADO)
 app.post('/api/pedidos', async (req, res) => {
   const { productos, metodo_pago, id_cliente } = req.body;
-  
+
   // Validaciones básicas
   if (!productos || !Array.isArray(productos) || productos.length === 0) {
     return res.status(400).json({
@@ -185,49 +185,49 @@ app.post('/api/pedidos', async (req, res) => {
       message: 'Debe incluir al menos un producto en el pedido'
     });
   }
-  
+
   if (!metodo_pago) {
     return res.status(400).json({
       status: 'ERROR',
       message: 'Debe especificar el método de pago'
     });
   }
-  
+
   // Si no se proporciona cliente, usar el cliente invitado (ID 5 según nuestro script)
   const clienteId = id_cliente || 5;
-  
+
   // Usar transacción para garantizar la integridad
   try {
     return await sql.begin(async (sql) => {
       let total = 0;
-      
+
       // Verificar que el cliente existe
       const clienteInfo = await sql`
         SELECT * FROM clientes WHERE id_cliente = ${clienteId};
       `;
-      
+
       if (clienteInfo.length === 0) {
         throw new Error(`El cliente con ID ${clienteId} no existe`);
       }
-      
+
       // Obtener el ID del estado "pendiente"
       const estadoPendiente = await sql`
         SELECT id_estado FROM estado_pedido WHERE nombre = 'pendiente';
       `;
-      
+
       if (estadoPendiente.length === 0) {
         throw new Error('No se encontró el estado "pendiente" en la base de datos');
       }
-      
+
       // Obtener ID del tipo de pago
       const tipoPago = await sql`
         SELECT idtipopago FROM tipopago WHERE nombre = ${metodo_pago};
       `;
-      
+
       if (tipoPago.length === 0) {
         throw new Error(`El método de pago "${metodo_pago}" no existe`);
       }
-      
+
       // Calcular subtotales por cada producto individual
       for (const producto of productos) {
         // Verificar que el producto existe
@@ -235,14 +235,14 @@ app.post('/api/pedidos', async (req, res) => {
           SELECT * FROM productos 
           WHERE id_producto = ${producto.id_producto};
         `;
-        
+
         if (productoInfo.length === 0) {
           throw new Error(`El producto con ID ${producto.id_producto} no existe`);
         }
-        
+
         // Calcular precio base (siempre 1 unidad por fila)
         let subtotal = productoInfo[0].precio_base;
-        
+
         // Calcular precios de ingredientes extras
         if (producto.ingredientes_personalizados && producto.ingredientes_personalizados.length > 0) {
           for (const ingrediente of producto.ingredientes_personalizados) {
@@ -252,29 +252,29 @@ app.post('/api/pedidos', async (req, res) => {
                 SELECT * FROM ingredientes
                 WHERE id_ingrediente = ${ingrediente.id_ingrediente};
               `;
-              
+
               if (ingredienteInfo.length === 0) {
                 throw new Error(`El ingrediente con ID ${ingrediente.id_ingrediente} no existe`);
               }
-              
+
               // Agregar costo de ingrediente extra
               subtotal += ingredienteInfo[0].precio * ingrediente.cantidad;
             }
           }
         }
-        
+
         // Actualizar subtotal del producto
         producto.subtotal = subtotal;
         total += subtotal;
       }
-      
+
       // Crear nuevo pedido (usando TIMESTAMP en lugar de epoch si ya cambiaste la BD)
       const nuevoPedido = await sql`
         INSERT INTO pedidos (fecha_hora, total, id_cliente, id_estado)
         VALUES (CURRENT_TIMESTAMP, ${total}, ${clienteId}, ${estadoPendiente[0].id_estado})
         RETURNING *;
       `;
-      
+
       // Crear registro de pago
       const nuevoPago = await sql`
         INSERT INTO pago (idpedido, idtipopago, monto, descripcion)
@@ -286,7 +286,7 @@ app.post('/api/pedidos', async (req, res) => {
         )
         RETURNING *;
       `;
-      
+
       // Insertar productos del pedido (cada producto como fila individual)
       const productosCreados = [];
       for (const producto of productos) {
@@ -300,9 +300,9 @@ app.post('/api/pedidos', async (req, res) => {
           )
           RETURNING *;
         `;
-        
+
         productosCreados.push(nuevoPedidoProducto[0]);
-        
+
         // Insertar ingredientes personalizados
         if (producto.ingredientes_personalizados && producto.ingredientes_personalizados.length > 0) {
           for (const ingrediente of producto.ingredientes_personalizados) {
@@ -323,7 +323,7 @@ app.post('/api/pedidos', async (req, res) => {
           }
         }
       }
-      
+
       return res.status(201).json({
         status: 'OK',
         message: 'Pedido creado correctamente',
@@ -352,44 +352,44 @@ app.post('/api/pedidos', async (req, res) => {
 app.patch('/api/pedidos/:id/estado', async (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
-  
+
   // Validar estados válidos
   const estadosValidos = ['pendiente', 'elaboracion', 'completado', 'entregado'];
-  
+
   if (!estado || !estadosValidos.includes(estado)) {
     return res.status(400).json({
       status: 'ERROR',
       message: `Estado inválido. Debe ser uno de: ${estadosValidos.join(', ')}`
     });
   }
-  
+
   try {
     // Verificar que el pedido existe
     const pedidoExistente = await sql`
       SELECT * FROM pedidos
       WHERE id_pedido = ${id};
     `;
-    
+
     if (pedidoExistente.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el pedido con ID ${id}`
       });
     }
-    
+
     // Obtener el ID del nuevo estado desde la tabla estado_pedido
     const estadoInfo = await sql`
       SELECT id_estado FROM estado_pedido 
       WHERE nombre = ${estado};
     `;
-    
+
     if (estadoInfo.length === 0) {
       return res.status(400).json({
         status: 'ERROR',
         message: `El estado "${estado}" no existe en la base de datos`
       });
     }
-    
+
     // Actualizar el estado usando el id_estado
     const pedidoActualizado = await sql`
       UPDATE pedidos
@@ -397,7 +397,7 @@ app.patch('/api/pedidos/:id/estado', async (req, res) => {
       WHERE id_pedido = ${id}
       RETURNING *;
     `;
-    
+
     // Obtener los datos completos del pedido actualizado con el nombre del estado
     const pedidoCompleto = await sql`
       SELECT 
@@ -407,7 +407,7 @@ app.patch('/api/pedidos/:id/estado', async (req, res) => {
       JOIN estado_pedido ep ON p.id_estado = ep.id_estado
       WHERE p.id_pedido = ${id};
     `;
-    
+
     res.json({
       status: 'OK',
       message: `Estado del pedido actualizado a "${estado}"`,
@@ -426,21 +426,21 @@ app.patch('/api/pedidos/:id/estado', async (req, res) => {
 // 5. Eliminar un pedido (COMPLETO)
 app.delete('/api/pedidos/:id', async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     // Verificar que el pedido existe
     const pedidoExistente = await sql`
       SELECT * FROM pedidos
       WHERE id_pedido = ${id};
     `;
-    
+
     if (pedidoExistente.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el pedido con ID ${id}`
       });
     }
-    
+
     // Usar transacción para eliminar en cascada
     return await sql.begin(async (sql) => {
       // 1. Obtener todos los pedidos_productos
@@ -448,7 +448,7 @@ app.delete('/api/pedidos/:id', async (req, res) => {
         SELECT id_pedido_producto FROM pedidos_productos
         WHERE id_pedido = ${id};
       `;
-      
+
       // 2. Eliminar ingredientes personalizados
       for (const pedidoProducto of pedidosProductos) {
         await sql`
@@ -456,32 +456,32 @@ app.delete('/api/pedidos/:id', async (req, res) => {
           WHERE id_pedido_producto = ${pedidoProducto.id_pedido_producto};
         `;
       }
-      
+
       // 3. Eliminar productos del pedido
       await sql`
         DELETE FROM pedidos_productos
         WHERE id_pedido = ${id};
       `;
-      
+
       // 4. Eliminar registros de pago asociados
       await sql`
         DELETE FROM pago
         WHERE idpedido = ${id};
       `;
-      
+
       // 5. Eliminar cupones asociados (si los hay)
       await sql`
         DELETE FROM cupon
         WHERE idpedido = ${id};
       `;
-      
+
       // 6. Finalmente, eliminar el pedido principal
       const pedidoEliminado = await sql`
         DELETE FROM pedidos
         WHERE id_pedido = ${id}
         RETURNING id_pedido, total;
       `;
-      
+
       return res.json({
         status: 'OK',
         message: `Pedido con ID ${id} eliminado correctamente`,
@@ -531,16 +531,16 @@ app.get('/api/pedidos/clientes/:id_cliente', async (req, res) => {
 // 6. Obtener pedidos por estado
 app.get('/api/pedidos/estado/:estado', async (req, res) => {
   const { estado } = req.params;
-  
+
   const estadosValidos = ['pendiente', 'elaboracion', 'completado', 'entregado'];
-  
+
   if (!estadosValidos.includes(estado)) {
     return res.status(400).json({
       status: 'ERROR',
       message: `Estado inválido. Debe ser uno de: ${estadosValidos.join(', ')}`
     });
   }
-  
+
   try {
     const pedidos = await sql`
       SELECT 
@@ -557,7 +557,7 @@ app.get('/api/pedidos/estado/:estado', async (req, res) => {
       WHERE ep.nombre = ${estado}
       ORDER BY p.fecha_hora DESC;
     `;
-    
+
     res.json({
       status: 'OK',
       message: `Se encontraron ${pedidos.length} pedidos con estado "${estado}"`,
@@ -576,7 +576,7 @@ app.get('/api/pedidos/estado/:estado', async (req, res) => {
 // 7. Obtener detalle de un producto específico en un pedido
 app.get('/api/pedidos/:idPedido/productos/:idPedidoProducto', async (req, res) => {
   const { idPedido, idPedidoProducto } = req.params;
-  
+
   try {
     const productoEnPedido = await sql`
       SELECT 
@@ -589,14 +589,14 @@ app.get('/api/pedidos/:idPedido/productos/:idPedidoProducto', async (req, res) =
       WHERE pp.id_pedido = ${idPedido} 
         AND pp.id_pedido_producto = ${idPedidoProducto};
     `;
-    
+
     if (productoEnPedido.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el producto ${idPedidoProducto} en el pedido ${idPedido}`
       });
     }
-    
+
     const ingredientes = await sql`
       SELECT 
         ppi.*,
@@ -606,7 +606,7 @@ app.get('/api/pedidos/:idPedido/productos/:idPedidoProducto', async (req, res) =
       JOIN ingredientes i ON ppi.id_ingrediente = i.id_ingrediente
       WHERE ppi.id_pedido_producto = ${idPedidoProducto};
     `;
-    
+
     res.json({
       status: 'OK',
       data: {
@@ -631,7 +631,7 @@ app.get('/api/pedidos/estadisticas/resumen', async (req, res) => {
     const totalPedidos = await sql`
       SELECT COUNT(*) as total FROM pedidos;
     `;
-    
+
     // Pedidos por estado (join con estado_pedido)
     const pedidosPorEstado = await sql`
       SELECT ep.nombre as estado, COUNT(*) as cantidad 
@@ -639,7 +639,7 @@ app.get('/api/pedidos/estadisticas/resumen', async (req, res) => {
       JOIN estado_pedido ep ON pd.id_estado = ep.id_estado
       GROUP BY ep.nombre;
     `;
-    
+
     // Productos más vendidos (ahora se usa la categoría desde categoriaproducto)
     const productosMasVendidos = await sql`
       SELECT p.id_producto, p.nombre, cp.nombre as categoria, 
@@ -652,7 +652,7 @@ app.get('/api/pedidos/estadisticas/resumen', async (req, res) => {
       ORDER BY unidades_vendidas DESC
       LIMIT 5;
     `;
-    
+
     // Ingredientes extras más solicitados
     const ingredientesMasSolicitados = await sql`
       SELECT i.id_ingrediente, i.nombre,
@@ -664,7 +664,7 @@ app.get('/api/pedidos/estadisticas/resumen', async (req, res) => {
       ORDER BY veces_solicitado DESC
       LIMIT 5;
     `;
-    
+
     // Ventas por método de pago (join con tipopago)
     const ventasPorMetodoPago = await sql`
       SELECT tp.nombre as metodo_pago, COUNT(pg.idpago) as cantidad_pedidos, SUM(pg.monto) as total_ventas
@@ -686,7 +686,7 @@ app.get('/api/pedidos/estadisticas/resumen', async (req, res) => {
       ORDER BY total_personalizaciones DESC
       LIMIT 5;
     `;
-    
+
     res.json({
       status: 'OK',
       data: {
@@ -713,7 +713,7 @@ app.get('/api/pedidos/estadisticas/resumen', async (req, res) => {
 app.post('/api/pedidos/:id/productos', async (req, res) => {
   const { id } = req.params;
   const { productos } = req.body;
-  
+
   // Validaciones básicas
   if (!productos || !Array.isArray(productos) || productos.length === 0) {
     return res.status(400).json({
@@ -721,21 +721,21 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
       message: 'Debe incluir al menos un producto para agregar al pedido'
     });
   }
-  
+
   try {
     // Verificar que el pedido existe
     const pedidoExistente = await sql`
       SELECT * FROM pedidos
       WHERE id_pedido = ${id};
     `;
-    
+
     if (pedidoExistente.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el pedido con ID ${id}`
       });
     }
-    
+
     // Verificar que el pedido no esté en estado "entregado" o "cancelado"
     if (['entregado', 'cancelado'].includes(pedidoExistente[0].estado)) {
       return res.status(400).json({
@@ -743,12 +743,12 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
         message: `No se pueden agregar productos a un pedido en estado "${pedidoExistente[0].estado}"`
       });
     }
-    
+
     // Usar transacción
     return await sql.begin(async (sql) => {
       let totalAdicional = 0;
       const productosAgregados = [];
-      
+
       // Calcular subtotales por cada producto individual
       for (const producto of productos) {
         // Verificar que el producto existe y está disponible
@@ -757,14 +757,14 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
           WHERE id_producto = ${producto.id_producto} 
           AND disponible = TRUE;
         `;
-        
+
         if (productoInfo.length === 0) {
           throw new Error(`El producto con ID ${producto.id_producto} no existe o no está disponible`);
         }
-        
+
         // Calcular precio base (1 unidad por fila)
         let subtotal = productoInfo[0].precio_base;
-        
+
         // Calcular precios de ingredientes extras
         if (producto.ingredientes_personalizados && producto.ingredientes_personalizados.length > 0) {
           for (const ingrediente of producto.ingredientes_personalizados) {
@@ -774,19 +774,19 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
                 SELECT * FROM ingredientes
                 WHERE id_ingrediente = ${ingrediente.id_ingrediente};
               `;
-              
+
               if (ingredienteInfo.length === 0) {
                 throw new Error(`El ingrediente con ID ${ingrediente.id_ingrediente} no existe`);
               }
-              
+
               // Agregar costo de ingrediente extra
               subtotal += ingredienteInfo[0].precio * ingrediente.cantidad;
             }
           }
         }
-        
+
         totalAdicional += subtotal;
-        
+
         // Insertar producto individual
         const nuevoPedidoProducto = await sql`
           INSERT INTO pedidos_productos (id_pedido, id_producto, subtotal, notas)
@@ -798,9 +798,9 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
           )
           RETURNING *;
         `;
-        
+
         productosAgregados.push(nuevoPedidoProducto[0]);
-        
+
         // Insertar ingredientes personalizados
         if (producto.ingredientes_personalizados && producto.ingredientes_personalizados.length > 0) {
           for (const ingrediente of producto.ingredientes_personalizados) {
@@ -821,17 +821,17 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
           }
         }
       }
-      
+
       // Actualizar el total del pedido
       const nuevoTotal = pedidoExistente[0].total + totalAdicional;
-      
+
       const pedidoActualizado = await sql`
         UPDATE pedidos
         SET total = ${nuevoTotal}
         WHERE id_pedido = ${id}
         RETURNING *;
       `;
-      
+
       return res.json({
         status: 'OK',
         message: 'Productos agregados correctamente al pedido',
@@ -852,10 +852,45 @@ app.post('/api/pedidos/:id/productos', async (req, res) => {
   }
 });
 
+app.post("/api/pedidos_productos_ingredientes", async (req, res) => {
+  try {
+    const { id_pedido_producto, ingredientes } = req.body;
+
+    if (!id_pedido_producto || !ingredientes || ingredientes.length === 0) {
+      return res.status(400).json({
+        status: "ERROR",
+        message: "Faltan datos en la solicitud (id_pedido_producto o ingredientes)."
+      });
+    }
+
+    // Insertar cada ingrediente
+    for (const ing of ingredientes) {
+      await sql`
+        INSERT INTO pedidos_productos_ingredientes 
+        (id_pedido_producto, id_ingrediente, cantidad, es_extra)
+        VALUES (${id_pedido_producto}, ${ing.id_ingrediente}, ${ing.cantidad}, ${ing.es_extra});
+      `;
+    }
+
+    res.status(201).json({
+      status: "OK",
+      message: "Ingredientes guardados correctamente para el producto del pedido."
+    });
+  } catch (error) {
+    console.error("Error al registrar ingredientes del pedido:", error);
+    res.status(500).json({
+      status: "ERROR",
+      message: "Error interno al registrar ingredientes.",
+      error: error.message
+    });
+  }
+});
+
+
 // 10. Eliminar un producto específico de un pedido
 app.delete('/api/pedidos/:id/productos/:idPedidoProducto', async (req, res) => {
   const { id, idPedidoProducto } = req.params;
-  
+
   try {
     // Verificar que el pedido existe y traer su estado
     const pedidoExistente = await sql`
@@ -864,27 +899,27 @@ app.delete('/api/pedidos/:id/productos/:idPedidoProducto', async (req, res) => {
       JOIN estado_pedido e ON p.id_estado = e.id_estado
       WHERE p.id_pedido = ${id};
     `;
-    
+
     if (pedidoExistente.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el pedido con ID ${id}`
       });
     }
-    
+
     // Verificar que el producto existe en el pedido
     const productoEnPedido = await sql`
       SELECT * FROM pedidos_productos
       WHERE id_pedido = ${id} AND id_pedido_producto = ${idPedidoProducto};
     `;
-    
+
     if (productoEnPedido.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el producto en el pedido ${id}`
       });
     }
-    
+
     // Verificar que el pedido no esté entregado o cancelado
     if (['entregado', 'cancelado'].includes(pedidoExistente[0].estado_nombre.toLowerCase())) {
       return res.status(400).json({
@@ -892,33 +927,33 @@ app.delete('/api/pedidos/:id/productos/:idPedidoProducto', async (req, res) => {
         message: `No se pueden eliminar productos de un pedido en estado "${pedidoExistente[0].estado_nombre}"`
       });
     }
-    
+
     // Usar transacción para eliminar
     return await sql.begin(async (sql) => {
       const subtotalEliminado = productoEnPedido[0].subtotal;
-      
+
       // Eliminar ingredientes personalizados del producto
       await sql`
         DELETE FROM pedidos_productos_ingredientes
         WHERE id_pedido_producto = ${idPedidoProducto};
       `;
-      
+
       // Eliminar el producto del pedido
       await sql`
         DELETE FROM pedidos_productos
         WHERE id_pedido_producto = ${idPedidoProducto};
       `;
-      
+
       // Actualizar el total del pedido
       const nuevoTotal = pedidoExistente[0].total - subtotalEliminado;
-      
+
       const pedidoActualizado = await sql`
         UPDATE pedidos
         SET total = ${nuevoTotal}
         WHERE id_pedido = ${id}
         RETURNING *;
       `;
-      
+
       return res.json({
         status: 'OK',
         message: 'Producto eliminado correctamente del pedido',
@@ -943,7 +978,7 @@ app.delete('/api/pedidos/:id/productos/:idPedidoProducto', async (req, res) => {
 // 11. Filtrar pedidos por rango de fechas
 app.get('/api/pedidos/filtro/fecha', async (req, res) => {
   const { desde, hasta } = req.query;
-  
+
   // Validar fechas
   if (!desde || !hasta) {
     return res.status(400).json({
@@ -951,7 +986,7 @@ app.get('/api/pedidos/filtro/fecha', async (req, res) => {
       message: 'Debe proporcionar fechas de inicio y fin (desde, hasta) en formato válido (YYYY-MM-DD o timestamp)'
     });
   }
-  
+
   try {
     const pedidos = await sql`
       SELECT 
@@ -966,7 +1001,7 @@ app.get('/api/pedidos/filtro/fecha', async (req, res) => {
       WHERE p.fecha_hora >= ${desde} AND p.fecha_hora <= ${hasta}
       ORDER BY p.fecha_hora DESC;
     `;
-    
+
     res.json({
       status: 'OK',
       cantidad: pedidos.length,
@@ -986,7 +1021,7 @@ app.get('/api/pedidos/filtro/fecha', async (req, res) => {
 // 12. Obtener resumen de productos en un pedido
 app.get('/api/pedidos/:id/resumen', async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     // Traer pedido con cliente y estado
     const pedidoExistente = await sql`
@@ -998,14 +1033,14 @@ app.get('/api/pedidos/:id/resumen', async (req, res) => {
       JOIN estado_pedido e ON p.id_estado = e.id_estado
       WHERE p.id_pedido = ${id};
     `;
-    
+
     if (pedidoExistente.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el pedido con ID ${id}`
       });
     }
-    
+
     // Resumen agrupado
     const resumenProductos = await sql`
       SELECT p.id_producto, p.nombre, p.precio_base,
@@ -1018,7 +1053,7 @@ app.get('/api/pedidos/:id/resumen', async (req, res) => {
       GROUP BY p.id_producto, p.nombre, p.precio_base
       ORDER BY cantidad_total DESC, p.nombre;
     `;
-    
+
     // Detalles de cada producto
     const productosDetallados = await sql`
       SELECT pp.id_pedido_producto, pp.id_producto, p.nombre, 
@@ -1034,7 +1069,7 @@ app.get('/api/pedidos/:id/resumen', async (req, res) => {
       GROUP BY pp.id_pedido_producto, pp.id_producto, p.nombre, pp.subtotal
       ORDER BY p.nombre, pp.id_pedido_producto;
     `;
-    
+
     res.json({
       status: 'OK',
       data: {
@@ -1130,7 +1165,7 @@ app.get('/api/productos', async (req, res) => {
       status: 'OK',
       data: productos
     });
-    
+
   } catch (error) {
     console.error("Error al obtener productos:", error.stack);
     res.status(500).json({
@@ -1144,21 +1179,21 @@ app.get('/api/productos', async (req, res) => {
 // 14. Obtener un producto específico con sus ingredientes base
 app.get('/api/productos/:id', async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     // Obtener información del producto
     const producto = await sql`
       SELECT * FROM productos
       WHERE id_producto = ${id};
     `;
-    
+
     if (producto.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el producto con ID ${id}`
       });
     }
-    
+
     // Obtener ingredientes base del producto
     const ingredientesBase = await sql`
       SELECT pib.cantidad, i.id_ingrediente, i.nombre, i.descripcion, 
@@ -1168,7 +1203,7 @@ app.get('/api/productos/:id', async (req, res) => {
       WHERE pib.id_producto = ${id}
       ORDER BY i.nombre;
     `;
-    
+
     res.json({
       status: 'OK',
       data: {
@@ -1189,7 +1224,7 @@ app.get('/api/productos/:id', async (req, res) => {
 // 15. Obtener productos por categoría (CORREGIDO)
 app.get('/api/productos/categoria/:categoria', async (req, res) => {
   const { categoria } = req.params;
-  
+
   try {
     // Buscar productos usando JOIN con la tabla categoriaproducto
     const productos = await sql`
@@ -1205,14 +1240,14 @@ app.get('/api/productos/categoria/:categoria', async (req, res) => {
       WHERE LOWER(cp.nombre) = LOWER(${categoria})
       ORDER BY p.id_producto;
     `;
-    
+
     if (productos.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontraron productos en la categoría "${categoria}"`
       });
     }
-    
+
     res.json({
       status: 'OK',
       message: `Se encontraron ${productos.length} productos en la categoría "${categoria}"`,
@@ -1240,7 +1275,7 @@ app.get('/api/ingredientes', async (req, res) => {
       SELECT * FROM ingredientes
       ORDER BY id_ingrediente;
     `;
-    
+
     res.json({
       status: 'OK',
       data: ingredientes
@@ -1258,20 +1293,20 @@ app.get('/api/ingredientes', async (req, res) => {
 // 17. Obtener un ingrediente específico
 app.get('/api/ingredientes/:id', async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     const ingrediente = await sql`
       SELECT * FROM ingredientes
       WHERE id_ingrediente = ${id};
     `;
-    
+
     if (ingrediente.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el ingrediente con ID ${id}`
       });
     }
-    
+
     res.json({
       status: 'OK',
       data: ingrediente[0]
@@ -1294,7 +1329,7 @@ app.get('/api/clientes', async (req, res) => {
       SELECT * FROM clientes
       ORDER BY nombre;
     `;
-    
+
     res.json({
       status: 'OK',
       data: clientes
@@ -1304,6 +1339,37 @@ app.get('/api/clientes', async (req, res) => {
     res.status(500).json({
       status: 'ERROR',
       message: 'Error al obtener clientes',
+      error: error.message
+    });
+  }
+});
+
+// Obtener un clientes por dni
+app.get('/api/clientes/:dni', async (req, res) => {
+  const { dni } = req.params;
+
+  try {
+    const cliente = await sql`
+      SELECT * FROM clientes
+      WHERE dni = ${dni};
+    `;
+
+    if (cliente.length === 0) {
+      return res.status(404).json({
+        status: 'ERROR',
+        message: `No se encontró el cliente con DNI ${dni}`
+      });
+    }
+
+    res.json({
+      status: 'OK',
+      data: cliente[0]
+    });
+  } catch (error) {
+    console.error(`Error al obtener cliente ${dni}:`, error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: `Error al obtener cliente ${dni}`,
       error: error.message
     });
   }
@@ -1344,6 +1410,39 @@ app.get('/api/clientes/:id', async (req, res) => {
 
 // --- ENDPOINTS ADICIONALES ---
 
+// obetener cupon por id cliente
+app.get('/api/cupones/:id_cliente', async (req, res) => {
+  const { id_cliente } = req.params;
+
+  try {
+    const cliente = await sql`
+      SELECT * FROM cupon
+      WHERE id_cliente = ${id_cliente};
+    `;
+
+    if (cliente.length === 0) {
+      return res.status(404).json({
+        status: 'ERROR',
+        message: `No se encontró el cupon ${id_cliente}`
+      });
+    }
+
+    res.json({
+      status: 'OK',
+      data: cliente[0]
+    });
+  } catch (error) {
+    console.error(`Error al obtener cupon ${id_cliente}:`, error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: `Error al obtener cupon ${id_cliente}`,
+      error: error.message
+    });
+  }
+});
+
+
+
 // 18. Obtener todas las categorías de productos
 app.get('/api/categorias', async (req, res) => {
   try {
@@ -1353,7 +1452,7 @@ app.get('/api/categorias', async (req, res) => {
       WHERE disponible = TRUE
       ORDER BY categoria;
     `;
-    
+
     res.json({
       status: 'OK',
       data: categorias.map(c => c.categoria)
@@ -1372,27 +1471,27 @@ app.get('/api/categorias', async (req, res) => {
 app.post('/api/productos/:id/calcular-precio', async (req, res) => {
   const { id } = req.params;
   const { ingredientes_personalizados } = req.body;
-  
+
   try {
     // Obtener información del producto base
     const producto = await sql`
       SELECT * FROM productos
       WHERE id_producto = ${id} AND disponible = TRUE;
     `;
-    
+
     if (producto.length === 0) {
       return res.status(404).json({
         status: 'ERROR',
         message: `No se encontró el producto con ID ${id}`
       });
     }
-    
+
     let precioTotal = producto[0].precio_base;
     const detallePrecios = [{
       concepto: 'Precio base',
       precio: producto[0].precio_base
     }];
-    
+
     // Calcular precios de ingredientes extras
     if (ingredientes_personalizados && ingredientes_personalizados.length > 0) {
       for (const ingrediente of ingredientes_personalizados) {
@@ -1401,7 +1500,7 @@ app.post('/api/productos/:id/calcular-precio', async (req, res) => {
             SELECT * FROM ingredientes
             WHERE id_ingrediente = ${ingrediente.id_ingrediente};
           `;
-          
+
           if (ingredienteInfo.length > 0) {
             const costoExtra = ingredienteInfo[0].precio * ingrediente.cantidad;
             precioTotal += costoExtra;
@@ -1413,7 +1512,7 @@ app.post('/api/productos/:id/calcular-precio', async (req, res) => {
         }
       }
     }
-    
+
     res.json({
       status: 'OK',
       data: {
@@ -1435,14 +1534,14 @@ app.post('/api/productos/:id/calcular-precio', async (req, res) => {
 // 20. Obtener historial de pedidos de un método de pago específico
 app.get('/api/pedidos/metodo-pago/:metodo', async (req, res) => {
   const { metodo } = req.params;
-  
+
   try {
     const pedidos = await sql`
       SELECT * FROM pedidos
       WHERE metodo_pago = ${metodo}
       ORDER BY fecha_hora DESC;
     `;
-    
+
     res.json({
       status: 'OK',
       data: pedidos
@@ -1460,10 +1559,10 @@ app.get('/api/pedidos/metodo-pago/:metodo', async (req, res) => {
 // Iniciar el servidor
 app.listen(PORT, async () => {
   console.log(`🚀 Servidor iniciado en http://localhost:${PORT}`);
-  
+
   // Verificar la conexión a la base de datos al iniciar
   await testConnection();
-  
+
   // Cerrar el proceso si no se puede conectar a la base de datos
   process.on('SIGINT', async () => {
     console.log('Cerrando conexiones a la base de datos...');

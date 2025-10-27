@@ -1,0 +1,79 @@
+.pago-container {
+  max-width: 100%;
+  margin: 40px auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-family: Arial, sans-serif;
+}
+
+.pago-section {
+  margin-bottom: 30px;
+}
+
+h1, h2 {
+  color: #333;
+}
+
+.dni-busqueda {
+  display: flex;
+  gap: 10px;
+}
+
+.dni-busqueda input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.dni-busqueda button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.resumen table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resumen th, .resumen td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.metodos-pago {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.botones-pago {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.confirmar {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancelar {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+}

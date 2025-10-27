@@ -13,6 +13,7 @@ export const Edicion2 = () => {
   const [originales, setOriginales] = useState([]); // Copia para poder cancelar cambios
   const [loading, setLoading] = useState(true); // Indicador de carga
   const excluirIds = [1]; // Ejemplo: ids de ingredientes a excluir
+  const [total, setTotal] = useState(0);
 
   const idsExtrasProd1 = [9, 10, 13, 14, 15]; // IDs de ingredientes extra para el producto con id 1
   const idsExtrasProd2 = [10, 12, 13, 15]; // IDs de ingredientes extra para el producto con id 2
@@ -202,6 +203,7 @@ export const Edicion2 = () => {
         return "$0.00";
       })();
 
+
       if (idx === -1) {
         // Si no se encontró coincidencia: añadir nueva entrada manteniendo formato
         const nuevo = {
@@ -242,6 +244,7 @@ export const Edicion2 = () => {
     return actualizado; // opcional: devolver actualizado para uso interno
   }, [productos, setOriginales]);
 
+
   // Registrar las funciones cancelar/guardar en el contexto para que Layout las llame
   useEffect(() => {
     register(cancelarTodo, guardarTodo);
@@ -251,6 +254,8 @@ export const Edicion2 = () => {
   // Mensajes tempranos de retorno (evitan render innecesario)
   if (loading) return <p className="mensaje-vacio">Cargando...</p>;
   if (!productos.length) return <p className="mensaje-vacio">No hay productos seleccionados.</p>;
+
+
 
   // Render: para cada producto (normalmente 1 si venimos desde CardEdicion) mostramos su tabla de ingredientes
   return (
@@ -286,7 +291,7 @@ export const Edicion2 = () => {
                     </tr>
                   ))}
 
-                  <tr>
+                  {/* <tr>
                     <td colSpan={2}>
                       <div className="total-producto">
                         Total: $
@@ -298,7 +303,7 @@ export const Edicion2 = () => {
                         ).toFixed(2)}
                       </div>
                     </td>
-                  </tr>
+                  </tr> */}
                 </tbody>
               </table>
 
@@ -356,6 +361,16 @@ export const Edicion2 = () => {
                 </tbody>
               </table>
             </div>
+            <div className="footer-edicion">
+              Total: $
+              {(
+                producto.ingredientes.reduce(
+                  (acc, ing) => acc + Number(ing.precio) * Number(ing.cantidad),
+                  0
+                ) + 0.50
+              ).toFixed(2)}
+            </div>
+ 
           </div>
         );
       })}

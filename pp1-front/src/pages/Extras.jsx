@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card } from "../components/Card"
+import { CardEdicion } from "../components/CardEdicion";
 
 export const Extras = () => {
   const [extras, setExtras] = useState([])

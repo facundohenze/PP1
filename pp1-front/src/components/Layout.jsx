@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { NavTab } from "./NavTab";
+import { useEffect } from "react";
 import "../estilos/layout.css";
 import BarraSeleccion from "./BarraSeleccion";
 import { useContext, useState } from "react";
@@ -13,15 +14,26 @@ export const Layout = ({ children }) => {
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
 
-    const mostrar1 = location.pathname === "/Productos" || location.pathname === "/Extras" || location.pathname === "/Edicion" || location.pathname === "/Carrito" || location.pathname === "/Edicion2";
+    const mostrar1 = location.pathname === "/Productos" || location.pathname === "/Extras" || location.pathname === "/Edicion" || 
+        location.pathname === "/Carrito" || location.pathname === "/Edicion2" || location.pathname === "/Pago";
     const mostrar2 = location.pathname === "/Productos" || location.pathname === "/Extras";
     const mostrar3 = location.pathname === "/Productos" || location.pathname === "/Extras";
     const mostrar4 = location.pathname === "/Carrito";
     const mostrar5 = location.pathname === "/Edicion";
     const mostrar6 = location.pathname === "/Edicion2";
 
+    useEffect(() => {
+        const handleStorageChange = () => {
+            setTotalEdicion(localStorage.getItem("precio") || 0);
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
+
     return (
         <div className="layout">
+            
             {/* {mostrar && ()} */}
             {mostrar1 && (
                 <header className="layout-header">
@@ -94,7 +106,6 @@ export const Layout = ({ children }) => {
 
             {mostrar6 && (
                 <main className="layout-footer-carrito">
-                    <h1>total</h1>
                 </main>
             )}
 
@@ -137,7 +148,7 @@ export const Layout = ({ children }) => {
 
             {mostrar4 && (
                 <main className="layout-footer-carrito">
-                    <h1>total</h1>
+                    {/* <h1>total</h1> */}
                 </main>
             )}
 
@@ -152,7 +163,7 @@ export const Layout = ({ children }) => {
                         <button>Menú</button>
                     </Link>
                     <div className="boton-aceptar-pedido">
-                        <Link to="/Carrito">
+                        <Link to="/Pago">
                             <button>Confirmar Pedido</button>
                         </Link>
                     </div>
