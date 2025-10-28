@@ -1345,35 +1345,31 @@ app.get('/api/clientes', async (req, res) => {
 });
 
 // Obtener un clientes por dni
-app.get('/api/clientes/:dni', async (req, res) => {
+// Buscar cliente + cupones por DNI
+app.get('/api/cupones/clientes/:dni', async (req, res) => {
   const { dni } = req.params;
 
   try {
-    const cliente = await sql`
-      SELECT * FROM clientes
-      WHERE dni = ${dni};
+    const cupones = await sql`
+      SELECT c.*, cl.nombre
+      FROM cupon c
+      JOIN clientes cl ON cl.id_cliente = c.id_cliente
+      WHERE cl.dni = ${dni}
+      AND (c.fechavencimiento IS NULL OR c.fechavencimiento >= CURRENT_DATE)
+      ORDER BY c.fechavencimiento;
     `;
 
-    if (cliente.length === 0) {
-      return res.status(404).json({
-        status: 'ERROR',
-        message: `No se encontró el cliente con DNI ${dni}`
-      });
-    }
+    if (!cupones.length)
+      return res.status(404).json({ status: 'ERROR', message: 'No hay cupones' });
 
-    res.json({
-      status: 'OK',
-      data: cliente[0]
-    });
+    res.json({ status: 'OK', data: cupones });
   } catch (error) {
-    console.error(`Error al obtener cliente ${dni}:`, error);
-    res.status(500).json({
-      status: 'ERROR',
-      message: `Error al obtener cliente ${dni}`,
-      error: error.message
-    });
+    console.error(error);
+    res.status(500).json({ status: 'ERROR', message: 'Error del servidor' });
   }
 });
+
+
 
 // 17. Obtener un clientes específico
 // Obtener un cliente específico
@@ -1411,7 +1407,7 @@ app.get('/api/clientes/:id', async (req, res) => {
 // --- ENDPOINTS ADICIONALES ---
 
 // obetener cupon por id cliente
-app.get('/api/cupones/:id_cliente', async (req, res) => {
+app.get('/api/cupones/clientes/:id_cliente', async (req, res) => {
   const { id_cliente } = req.params;
 
   try {
@@ -1440,6 +1436,7 @@ app.get('/api/cupones/:id_cliente', async (req, res) => {
     });
   }
 });
+
 
 
 

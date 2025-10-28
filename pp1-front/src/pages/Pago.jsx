@@ -31,97 +31,69 @@ export const Pago = () => {
   };
 
   // Buscar cliente por DNI
+  // Buscar cliente por DNI
   const buscarCliente = async () => {
+    if (!dni) {
+      alert("Por favor ingrese un DNI válido");
+      return;
+    }
+
     try {
-      const res = await fetch(`http://localhost:3000/api/clientes?dni=${dni}`);
+      const res = await fetch(`http://localhost:3000/api/cupones/clientes/${dni}`);
       const data = await res.json();
 
       if (data.status === "OK" && data.data.length > 0) {
-        setCliente(data.data[0]);
-        obtenerCupones(data.data[0].id_cliente);
+        setCliente({ nombre: data.data[0].nombre, dni });
+        setCupones(data.data);
       } else {
         setCliente(null);
         setCupones([]);
-        alert("Cliente no encontrado. Continuará como invitado.");
+        alert("Cliente no encontrado o sin cupones");
       }
     } catch (error) {
       console.error("Error al buscar cliente:", error);
     }
   };
 
-  // Obtener cupones del cliente
-  const obtenerCupones = async (idCliente) => {
-    try {
-      const res = await fetch(`http://localhost:3000/api/cupones/${idCliente}`);
-      const data = await res.json();
 
-      if (data.status === "OK") {
-        setCupones(data.data);
-      }
-    } catch (error) {
-      console.error("Error al obtener cupones:", error);
-    }
-  };
 
   // Confirmar pago → guarda pedido en BD
   const confirmarPago = async () => {
     try {
-      // 1️⃣ Crear pedido
-      const pedidoRes = await fetch("http://localhost:3000/api/pedidos", {
+      // Armamos el cuerpo del pedido con el formato que tu backend espera
+      const productos = items.map((item) => ({
+        id_producto: item.id_producto || item.id,
+        ingredientes_personalizados: item.ingredientes_personalizados || []
+      }));
+
+      const pedidoBody = {
+        productos,
+        metodo_pago: metodoPago,
+        id_cliente: cliente ? cliente.id_cliente : 5 // invitado
+      };
+
+      const response = await fetch("http://localhost:3000/api/pedidos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id_cliente: cliente ? cliente.id_cliente : null,
-          total,
-          metodo_pago: metodoPago,
-          id_estado: 1,
-        }),
+        body: JSON.stringify(pedidoBody),
       });
-      const pedidoData = await pedidoRes.json();
-      const idPedido = pedidoData.data?.id_pedido;
 
-      if (!idPedido) throw new Error("No se pudo crear el pedido");
+      const data = await response.json();
 
-      // 2️⃣ Agregar productos
-      for (const item of items) {
-        const productoRes = await fetch(
-          `http://localhost:3000/api/pedidos/${idPedido}/productos`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id_producto: item.id,
-              cantidad: item.cantidad || 1,
-              subtotal: item.subtotal || item.precio,
-            }),
-          }
-        );
-        await productoRes.json();
+      if (data.status === "OK") {
+        alert(`✅ Pedido #${data.data.id_pedido} creado correctamente.`);
+        localStorage.removeItem("carrito");
+        window.location.href = "/";
+      } else {
+        alert("❌ Error al crear el pedido: " + data.message);
       }
 
-      // 3️⃣ Registrar pago
-      await fetch(`http://localhost:3000/api/pago`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idpedido: idPedido,
-          idtipopago: metodoPago === "efectivo" ? 1 : 2,
-          monto: total,
-          descripcion: cuponSeleccionado
-            ? `Pago con cupón: ${cuponSeleccionado.codigo}`
-            : "Pago sin cupón",
-        }),
-      });
-
-      alert("✅ Pedido registrado con éxito.");
-      localStorage.removeItem("carrito");
-      window.location.href = "/"; // Redirigir a inicio o confirmar pedido
-
     } catch (error) {
-      console.error("Error al confirmar pago:", error);
-      alert("❌ Hubo un error al procesar el pago.");
+      console.error("Error al confirmar el pedido:", error);
+      alert("Ocurrió un error al procesar el pedido.");
     }
   };
+
 
   const cancelarPago = () => {
     if (confirm("¿Cancelar el pago y volver al carrito?")) {
@@ -131,11 +103,11 @@ export const Pago = () => {
 
   return (
     <div className="pago-container">
-      <h1>Pago del Pedido</h1>
+      <h1 className="pago-titulo">💳 Pago del Pedido</h1>
 
       {/* 🧍 Datos del cliente */}
-      <div className="pago-section">
-        <h2>Datos del Cliente</h2>
+      <section className="pago-section">
+        <h2>🧾 Datos del Cliente</h2>
         <div className="dni-busqueda">
           <input
             type="text"
@@ -143,24 +115,27 @@ export const Pago = () => {
             value={dni}
             onChange={(e) => setDni(e.target.value)}
           />
-          <button onClick={buscarCliente}>Buscar</button>
+          <button className="btn-buscar" onClick={buscarCliente}>Buscar</button>
         </div>
-        {cliente && (
-          <p>
-            Cliente encontrado: <b>{cliente.nombre}</b>
-          </p>
+
+        {cliente ? (
+          <div className="cliente-info">
+            <p><b>Nombre:</b> {cliente.nombre}</p>
+            <p><b>DNI:</b> {cliente.dni}</p>
+          </div>
+        ) : (
+          <p className="cliente-alerta">Cliente no encontrado — continuará como invitado.</p>
         )}
-      </div>
+      </section>
 
       {/* 🎟️ Cupones */}
       {cupones.length > 0 && (
-        <div className="pago-section">
-          <h2>Cupones disponibles</h2>
+        <section className="pago-section">
+          <h2>🎟️ Cupones disponibles</h2>
           <select
+            className="select-cupon"
             onChange={(e) => {
-              const cupon = cupones.find(
-                (c) => c.idcupon === parseInt(e.target.value)
-              );
+              const cupon = cupones.find((c) => c.idcupon === parseInt(e.target.value));
               setCuponSeleccionado(cupon);
               calcularTotal(items, cupon);
             }}
@@ -168,17 +143,17 @@ export const Pago = () => {
             <option value="">Seleccionar cupón</option>
             {cupones.map((cupon) => (
               <option key={cupon.idcupon} value={cupon.idcupon}>
-                {cupon.codigo} - {cupon.descuento}% desc.
+                {cupon.codigo} — {cupon.descuento}% desc.
               </option>
             ))}
           </select>
-        </div>
+        </section>
       )}
 
-      {/* 🧾 Resumen */}
-      <div className="pago-section resumen">
-        <h2>Resumen del pedido</h2>
-        <table>
+      {/* 🧾 Resumen del pedido */}
+      <section className="pago-section resumen">
+        <h2>🛍️ Resumen del pedido</h2>
+        <table className="tabla-resumen">
           <thead>
             <tr>
               <th>Producto</th>
@@ -196,12 +171,18 @@ export const Pago = () => {
             ))}
           </tbody>
         </table>
-        <h3>Total: ${total}</h3>
-      </div>
+
+        {cuponSeleccionado && (
+          <p className="resumen-descuento">
+            Descuento aplicado: <b>{cuponSeleccionado.descuento}%</b>
+          </p>
+        )}
+        <h3 className="total-final">Total a pagar: ${total}</h3>
+      </section>
 
       {/* 💳 Método de pago */}
-      <div className="pago-section">
-        <h2>Método de pago</h2>
+      <section className="pago-section">
+        <h2>💰 Método de pago</h2>
         <div className="metodos-pago">
           <label>
             <input
@@ -224,19 +205,16 @@ export const Pago = () => {
             Mercado Pago
           </label>
         </div>
-      </div>
+      </section>
 
       {/* 🔘 Botones finales */}
       <div className="botones-pago">
-        <button className="confirmar" onClick={confirmarPago}>
-          Confirmar Pago
-        </button>
-        <button className="cancelar" onClick={cancelarPago}>
-          Cancelar
-        </button>
+        <button className="btn confirmar" onClick={confirmarPago}>✅ Confirmar Pago</button>
+        <button className="btn cancelar" onClick={cancelarPago}>❌ Cancelar</button>
       </div>
     </div>
   );
+
 };
 
 export default Pago;
