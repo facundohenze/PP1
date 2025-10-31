@@ -46,7 +46,6 @@ export const Productos = () => {
                         activa={tarjetaActiva === producto.id_producto}
                         activar={setTarjetaActiva}
                         categoria={producto.categoria}
-                        
                     />
                 ))}
         </div>

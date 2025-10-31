@@ -137,32 +137,6 @@ export const CardEdicion = ({
 
   // Render: si es extra mostramos controles dentro de la card, sino mantenemos Link a Edicion2
   if (esExtra) {
-    // Buscar el objeto en localStorage
-    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-    const productoGuardado = carrito.find((p) => p.id === id);
-
-    // Precio base actual (según tamaño)
-    const precioActual = productoGuardado?.opciones?.find(
-      (opt) => opt.nombre.toLowerCase() === tamano?.toLowerCase()
-    )?.precio || productoGuardado?.precio || 0;
-
-    const cambiarTamano = (nuevoTamano) => {
-      setTamano(nuevoTamano);
-
-      // Encontrar el nuevo precio
-      const nuevoPrecio = productoGuardado?.opciones?.find(
-        (opt) => opt.nombre.toLowerCase() === nuevoTamano.toLowerCase()
-      )?.precio || 0;
-
-      // Actualizar localStorage
-      const nuevoCarrito = carrito.map((item) =>
-        item.id === id
-          ? { ...item, tamano: nuevoTamano, precio: nuevoPrecio }
-          : item
-      );
-      localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-    };
-
     return (
       <div className={`tarjeta ${activa ? "activa" : "inactiva"}`}>
         <div className="tarjeta-contenido">
@@ -172,45 +146,34 @@ export const CardEdicion = ({
         </div>
 
         {!activa ? (
-          <>
-            {/* <p className="tamano-actual">
-              Tamaño: <b>{tamano ? tamano : "No seleccionado"}</b>
-            </p>
-            <p className="precio-actual">
-              Precio actual: <b>${precioActual}</b>
-            </p> */}
-            <button className="boton-editar" onClick={abrirControles}>
-              Editar
-            </button>
-          </>
+          <button className="boton-editar" onClick={abrirControles}>
+            Editar
+          </button>
         ) : (
           <div className="tarjeta-controles">
-            {/* Tamaños */}
+            {/* Tamaño: mantener formato de Card.jsx */}
             <div className="tamano-selector">
               <button
                 className={tamano === "mediano" ? "activo" : ""}
                 onClick={(e) => {
                   e.stopPropagation();
-                  cambiarTamano("mediano");
+                  setTamano("mediano");
                 }}
               >
-                Mediano (${productoGuardado?.opciones?.find(o => o.nombre === "Mediano")?.precio || 0})
+                Mediano
               </button>
               <button
                 className={tamano === "grande" ? "activo" : ""}
                 onClick={(e) => {
                   e.stopPropagation();
-                  cambiarTamano("grande");
+                  setTamano("grande");
                 }}
               >
-                Grande (${productoGuardado?.opciones?.find(o => o.nombre === "Grande")?.precio || 0})
+                Grande
               </button>
             </div>
 
-            {/* <p className="precio-actual">
-              Precio actual: <b>${precioActual}</b>
-            </p> */}
-
+            {/* Acciones */}
             <div className="action-buttons">
               <button className="boton-confirmar" onClick={confirmarLocal}>
                 Confirmar
@@ -224,8 +187,6 @@ export const CardEdicion = ({
       </div>
     );
   }
-
-
   return (
     <div className="tarjeta inactiva">
       {/* Contenido principal de la tarjeta */}

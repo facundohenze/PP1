@@ -36,40 +36,17 @@ export const Card = ({
     return tamano !== null; // Los extras requieren selección de tamaño
   };
 
-  const confirmar = async () => {
+  const confirmar = () => {
+    // Verificación adicional antes de confirmar
     if (!puedeConfirmar()) return;
 
+    // Precio unitario según tamaño/categoría
     const precioUnitario = (() => {
       if (categoria === "hamburguesa") return precioNumero;
       return tamano === "grande" ? Number(precioGrande) : precioNumero;
     })();
 
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-    // Crear estructura de ingredientes o tamaños posibles
-    let opciones = [];
-
-    if (categoria === "hamburguesa") {
-      // 🥩 Para hamburguesas: ingredientes base con seleccionado=true
-      try {
-        const res = await fetch(`http://localhost:3000/api/productos/${id}`);
-        const data = await res.json();
-        if (data?.data?.ingredientes_base) {
-          opciones = data.data.ingredientes_base.map(ing => ({
-            ...ing,
-            seleccionado: true,
-          }));
-        }
-      } catch (err) {
-        console.error("Error al cargar ingredientes:", err);
-      }
-    } else {
-      // 🍟 Para extras: tamaños posibles
-      opciones = [
-        { nombre: "Mediano", precio: precioNumero, seleccionado: tamano === "mediano" },
-        { nombre: "Grande", precio: precioGrande, seleccionado: tamano === "grande" },
-      ];
-    }
 
     // Crear N entradas separadas con cantidad = 1
     for (let i = 0; i < cantidad; i++) {
@@ -80,8 +57,7 @@ export const Card = ({
         categoria,
         cantidad: 1,
         tamano: categoria !== "hamburguesa" ? tamano : null,
-        precio: `$${precioUnitario.toFixed(2)}`,
-        opciones, // ✅ ingredientes o tamaños guardados
+        precio: `$${precioUnitario.toFixed(2)}`, // guardar como string con $
       });
     }
 
@@ -91,7 +67,6 @@ export const Card = ({
     setTamano(null);
     activar(null);
   };
-
 
   const cancelar = (e) => {
     e.stopPropagation();

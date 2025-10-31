@@ -290,6 +290,20 @@ export const Edicion2 = () => {
                       <td>{ing.nombre}</td>
                     </tr>
                   ))}
+
+                  {/* <tr>
+                    <td colSpan={2}>
+                      <div className="total-producto">
+                        Total: $
+                        {(
+                          producto.ingredientes.reduce(
+                            (acc, ing) => acc + Number(ing.precio) * Number(ing.cantidad),
+                            0
+                          ) + 0.50
+                        ).toFixed(2)}
+                      </div>
+                    </td>
+                  </tr> */}
                 </tbody>
               </table>
 
