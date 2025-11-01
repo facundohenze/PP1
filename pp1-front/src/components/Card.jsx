@@ -14,8 +14,12 @@ export const Card = ({
   const [cantidad, setCantidad] = useState(1);
   const [tamano, setTamano] = useState(null);
 
+  // 🔹 Mantiene el valor numérico limpio
   const precioNumero = Number(precio.replace(/[^0-9.]/g, ""));
   const precioGrande = (precioNumero * 1.5).toFixed(2);
+
+  // 🔹 Formateos solo para mostrar
+  const mostrarPrecio = (valor) => `$${valor.toString().replace('.', ',')}`;
 
   const aumentar = () => setCantidad(cantidad + 1);
   const restar = () => {
@@ -28,12 +32,11 @@ export const Card = ({
     return (base * cantidad).toFixed(2);
   };
 
-  // Función para verificar si se puede confirmar
   const puedeConfirmar = () => {
     if (categoria === "hamburguesa") {
-      return true; // Las hamburguesas no necesitan selección de tamaño
+      return true;
     }
-    return tamano !== null; // Los extras requieren selección de tamaño
+    return tamano !== null;
   };
 
   const confirmar = async () => {
@@ -46,16 +49,14 @@ export const Card = ({
 
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-    // Crear estructura de ingredientes o tamaños posibles
     let opciones = [];
 
     if (categoria === "hamburguesa") {
-      // 🥩 Para hamburguesas: ingredientes base con seleccionado=true
       try {
         const res = await fetch(`http://localhost:3000/api/productos/${id}`);
         const data = await res.json();
         if (data?.data?.ingredientes_base) {
-          opciones = data.data.ingredientes_base.map(ing => ({
+          opciones = data.data.ingredientes_base.map((ing) => ({
             ...ing,
             seleccionado: true,
           }));
@@ -64,14 +65,12 @@ export const Card = ({
         console.error("Error al cargar ingredientes:", err);
       }
     } else {
-      // 🍟 Para extras: tamaños posibles
       opciones = [
-        { nombre: "Mediano", precio: precioNumero, seleccionado: tamano === "mediano" },
-        { nombre: "Grande", precio: precioGrande, seleccionado: tamano === "grande" },
+        { nombre: "Mediano", precio: mostrarPrecio(precioNumero.toFixed(2)), seleccionado: tamano === "mediano" },
+        { nombre: "Grande", precio: mostrarPrecio(precioGrande), seleccionado: tamano === "grande" },
       ];
     }
 
-    // Crear N entradas separadas con cantidad = 1
     for (let i = 0; i < cantidad; i++) {
       carrito.push({
         id,
@@ -80,8 +79,8 @@ export const Card = ({
         categoria,
         cantidad: 1,
         tamano: categoria !== "hamburguesa" ? tamano : null,
-        precio: `$${precioUnitario.toFixed(2)}`,
-        opciones, // ✅ ingredientes o tamaños guardados
+        precio: mostrarPrecio(precioUnitario.toFixed(2)),
+        opciones,
       });
     }
 
@@ -91,7 +90,6 @@ export const Card = ({
     setTamano(null);
     activar(null);
   };
-
 
   const cancelar = (e) => {
     e.stopPropagation();
@@ -108,27 +106,34 @@ export const Card = ({
       <div className="tarjeta-contenido">
         <h3>{nombre}</h3>
         <p>{descripcion}</p>
-        <img src={imagen} alt={nombre} className={`tarjeta-imagen ${activa ? "img-activa" : "img-inactiva"}`} />
+        <img
+          src={imagen}
+          alt={nombre}
+          className={`tarjeta-imagen ${activa ? "img-activa" : "img-inactiva"}`}
+        />
       </div>
 
       {/* -------- INACTIVA -------- */}
       {!activa && categoria !== "hamburguesa" && (
         <div className="tamano-precios">
-          <span className="precio-mediano">Mediano: ${precioNumero}</span>
-          <span className="precio-grande">Grande: ${precioGrande}</span>
+          <span className="precio-mediano">
+            Mediano: {mostrarPrecio(precioNumero.toFixed(2))}
+          </span>
+          <span className="precio-grande">
+            Grande: {mostrarPrecio(precioGrande)}
+          </span>
         </div>
       )}
 
       {!activa && categoria === "hamburguesa" && (
         <div className="precio-base">
-          <span>${precioNumero}</span>
+          <span>{mostrarPrecio(precioNumero.toFixed(2))}</span>
         </div>
       )}
 
       {/* -------- ACTIVA -------- */}
       {activa && (
         <div className="tarjeta-controles">
-          {/* Selector de tamaño solo en extras */}
           {categoria !== "hamburguesa" && (
             <div className="tamano-selector">
               <button
@@ -138,7 +143,7 @@ export const Card = ({
                   setTamano("mediano");
                 }}
               >
-                Mediano (${precioNumero})
+                Mediano ({mostrarPrecio(precioNumero.toFixed(2))})
               </button>
               <button
                 className={tamano === "grande" ? "activo" : ""}
@@ -147,19 +152,17 @@ export const Card = ({
                   setTamano("grande");
                 }}
               >
-                Grande (${precioGrande})
+                Grande ({mostrarPrecio(precioGrande)})
               </button>
             </div>
           )}
 
-          {/* Mensaje de ayuda cuando no se ha seleccionado tamaño */}
           {categoria !== "hamburguesa" && !tamano && (
             <div className="mensaje-seleccionar">
               <span>Selecciona un tamaño primero</span>
             </div>
           )}
 
-          {/* Controles de cantidad */}
           <div className="cantidad-controls">
             <button
               onClick={(e) => {
@@ -180,18 +183,15 @@ export const Card = ({
             </button>
           </div>
 
-          {/* Total */}
-          {((categoria !== "hamburguesa" && tamano) ||
-            categoria === "hamburguesa") && (
-              <div className="total-display rojo">
-                Total: ${calcularTotal() || (precioNumero * cantidad).toFixed(2)}
-              </div>
-            )}
+          {(categoria === "hamburguesa" || tamano) && (
+            <div className="total-display rojo">
+              Total: {mostrarPrecio(calcularTotal() || (precioNumero * cantidad).toFixed(2))}
+            </div>
+          )}
 
-          {/* Confirmar / Cancelar */}
           <div className="action-buttons">
             <button
-              className={`boton-confirmar ${!puedeConfirmar() ? 'deshabilitado' : ''}`}
+              className={`boton-confirmar ${!puedeConfirmar() ? "deshabilitado" : ""}`}
               disabled={!puedeConfirmar()}
               onClick={(e) => {
                 e.stopPropagation();

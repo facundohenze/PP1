@@ -149,19 +149,26 @@ export const CardEdicion = ({
     const cambiarTamano = (nuevoTamano) => {
       setTamano(nuevoTamano);
 
-      // Encontrar el nuevo precio
-      const nuevoPrecio = productoGuardado?.opciones?.find(
-        (opt) => opt.nombre.toLowerCase() === nuevoTamano.toLowerCase()
-      )?.precio || 0;
+      // Encontrar el nuevo precio (numérico)
+      const nuevoPrecio = parseFloat(
+        productoGuardado?.opciones?.find(
+          (opt) => opt.nombre.toLowerCase() === nuevoTamano.toLowerCase()
+        )?.precio || 0
+      );
+
+      // Formatear el precio con signo $
+      const precioFormateado = `$${nuevoPrecio.toFixed(2)}`;
 
       // Actualizar localStorage
       const nuevoCarrito = carrito.map((item) =>
         item.id === id
-          ? { ...item, tamano: nuevoTamano, precio: nuevoPrecio }
+          ? { ...item, tamano: nuevoTamano, precio: precioFormateado }
           : item
       );
+
       localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
     };
+
 
     return (
       <div className={`tarjeta ${activa ? "activa" : "inactiva"}`}>
@@ -170,20 +177,6 @@ export const CardEdicion = ({
           <p className="tarjeta-descripcion">{descripcion}</p>
           <img src={imagen} alt={nombre} className="tarjeta-imagen img-inactiva" />
         </div>
-
-        {!activa ? (
-          <>
-            {/* <p className="tamano-actual">
-              Tamaño: <b>{tamano ? tamano : "No seleccionado"}</b>
-            </p>
-            <p className="precio-actual">
-              Precio actual: <b>${precioActual}</b>
-            </p> */}
-            <button className="boton-editar" onClick={abrirControles}>
-              Editar
-            </button>
-          </>
-        ) : (
           <div className="tarjeta-controles">
             {/* Tamaños */}
             <div className="tamano-selector">
@@ -210,17 +203,8 @@ export const CardEdicion = ({
             {/* <p className="precio-actual">
               Precio actual: <b>${precioActual}</b>
             </p> */}
-
-            <div className="action-buttons">
-              <button className="boton-confirmar" onClick={confirmarLocal}>
-                Confirmar
-              </button>
-              <button className="boton-cancelar" onClick={cerrarControles}>
-                Cancelar
-              </button>
-            </div>
           </div>
-        )}
+        
       </div>
     );
   }
@@ -251,7 +235,7 @@ export const CardEdicion = ({
         }}
       >
         <button className="boton-editar">
-          Editar
+          Personalizar
         </button>
       </Link>
     </div>

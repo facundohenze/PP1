@@ -32,6 +32,19 @@
 
 }
 
+.layout-top {
+  display: flex;
+  /* background-color: #f4f4f4; */
+  justify-content: center; /* alineacion de las tabs */
+}
+
+.layout-top h1 {
+  margin-top: 35px;
+ font-size: 40px;
+  font-weight: bold;
+}
+
+
 .layout-footer {
   flex: 0 0 auto;       /* footer ocupa su tamaño natural */
   display: flex;

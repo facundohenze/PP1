@@ -1,66 +1,101 @@
-.table {
-  width: 100%;
-  border-collapse: collapse; /* 👈 elimina espacio entre celdas */
-  font-size: 26px;           /* bajá un poco la fuente si lo ves muy grande */
-}
-
-.table tbody tr{
-  height: 110px;
-}
-
-.table th,
-.table td {
-  padding: 8px 12px;  /* 👈 controla el espacio interno */
-}
-
-.table .columna {
-  background-color: #E9FF45;
-}
-
-.img-carrito {
-  width: 100px;
-  height: auto;
-
-}
-
-
-.footer-edicion {
-  position: fixed;        /* 🔹 Fija la barra en pantalla */
-  bottom: 21%;           /* 🔹 La separa un poco del borde inferior */
-  left: 0;
-  width: 100%;
-  background-color: #d9d9d9;
-  color: rgb(0, 0, 0);
+.carrito-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  padding: 12px 24px;
-  font-size: 37px;
+  padding: 20px;
+}
+
+.vacio {
+  font-size: 22px;
+  color: #555;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.carrito-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 90%;
+  max-width: 800px;
+}
+
+.carrito-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  height: 160px;
+}
+
+.carrito-imagen {
+  width: 110px;
+  height: 90px;
+  
+  border-radius: 8px;
+}
+
+.carrito-info {
+  flex: 1;
+  margin-left: 15px;
+}
+
+.carrito-nombre {
+  font-size: 24px;
   font-weight: bold;
-  z-index: 100;           /* 🔹 Asegura que quede por encima de otros elementos */
-  border-radius: 6px 6px 0 0; /* 🔹 Redondea las esquinas superiores */
+  margin: 0;
+}
+
+.carrito-descripcion {
+  font-size: 17px;
+  color: #666;
+  margin-top: 3px;
+  margin-bottom: 0;
+}
+
+.carrito-tamaño{
+  margin: 0;
+  font-weight: bold;
+  color: #772424;
+  font-size: 19px;
+}
+
+.carrito-precio {
+  font-size: 19px;
+  font-weight: bold;
+  color: #28a745;
+  margin-top: 6px;
 }
 
 .btn-eliminar {
   background-color: #d9534f;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  font-size: 15px;
 }
 
 .btn-eliminar:hover {
   background-color: #b52b27;
 }
 
-.footer-edicion {
-  margin-top: 20px;
-  background-color: #d9d9d9;
+.footer-total {
+  position: fixed;
+  bottom: 21%;  
+  left: 0;
+  width: 100%;
+  height: 90px;
+  background-color: #f4f4f4;
   color: black;
   text-align: center;
-  padding: 12px;
-  font-size: 20px;
+  padding: 14px;
+  font-size: 33px;
   font-weight: bold;
+  z-index: 100;      
 }

@@ -15,11 +15,11 @@
     /* Limita el ancho máximo para pantallas grandes */
 }
 
-.tarjeta:hover {
+/* .tarjeta:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     border-color: #A12A2A;
-}
+} */
 
 /* Imagen cuando la card está activa (con controles visibles) */
 .img-activa {

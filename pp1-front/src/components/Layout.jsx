@@ -14,13 +14,14 @@ export const Layout = ({ children }) => {
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
 
-    const mostrar1 = location.pathname === "/Productos" || location.pathname === "/Extras" || location.pathname === "/Edicion" || 
+    const mostrar1 = location.pathname === "/Productos" || location.pathname === "/Extras" || location.pathname === "/Edicion" ||
         location.pathname === "/Carrito" || location.pathname === "/Edicion2" || location.pathname === "/Pago";
     const mostrar2 = location.pathname === "/Productos" || location.pathname === "/Extras";
     const mostrar3 = location.pathname === "/Productos" || location.pathname === "/Extras";
     const mostrar4 = location.pathname === "/Carrito";
     const mostrar5 = location.pathname === "/Edicion";
     const mostrar6 = location.pathname === "/Edicion2";
+    const mostrar7 = location.pathname === "/Pago";
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -33,7 +34,7 @@ export const Layout = ({ children }) => {
 
     return (
         <div className="layout">
-            
+
             {/* {mostrar && ()} */}
             {mostrar1 && (
                 <header className="layout-header">
@@ -48,9 +49,16 @@ export const Layout = ({ children }) => {
             )}
 
             <main className="layout-main">
+                {mostrar4 && (
+                    <main className="layout-top">
+                        <h1>Tu pedido</h1>
+                    </main>
+                )}
+
                 <div className="productos-container">
                     {children}
                 </div>
+
             </main>
 
             {mostrar3 && (
@@ -101,6 +109,11 @@ export const Layout = ({ children }) => {
                         </Link>
                     </div>
 
+                </div>
+            )}
+
+            {mostrar7 && (
+                <div className="footer-buttons-carrito">
                 </div>
             )}
 

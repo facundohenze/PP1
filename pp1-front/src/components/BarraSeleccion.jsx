@@ -40,8 +40,8 @@ const BarraSeleccion = () => {
           <div key={index} className="item-seleccion">
             <img src={`/imagenes/${item.id}.png`} alt={item.nombre} />
             <span className="nombre">{item.nombre}</span>
-            <span className="precio">{item.subtotal || item.precio}</span>
             <span className="precio">{item.tamano}</span>
+            <span className="precio">{item.subtotal || item.precio}</span>
           </div>
         ))
       ) : (

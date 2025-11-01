@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "../estilos/pago.css";
 
 export const Pago = () => {
@@ -6,11 +7,10 @@ export const Pago = () => {
   const [cliente, setCliente] = useState(null);
   const [cupones, setCupones] = useState([]);
   const [cuponSeleccionado, setCuponSeleccionado] = useState(null);
-  const [metodoPago, setMetodoPago] = useState("efectivo");
+  const [metodoPago, setMetodoPago] = useState(null);
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
 
-  // Cargar productos desde localStorage
   useEffect(() => {
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     setItems(carrito);
@@ -19,19 +19,18 @@ export const Pago = () => {
 
   const calcularTotal = (carrito, cupon = null) => {
     let subtotal = carrito.reduce((acc, item) => {
-      const valor = parseFloat(item.subtotal || item.precio);
+      const precio = item.subtotal || item.precio || 0;
+      const valor = typeof precio === "string" ? parseFloat(precio.replace("$", "")) : parseFloat(precio);
       return acc + (isNaN(valor) ? 0 : valor);
     }, 0);
 
-    if (cupon) {
-      subtotal = subtotal - subtotal * (cupon.descuento / 100);
+    if (cupon && cupon.descuento) {
+      subtotal -= subtotal * (cupon.descuento / 100);
     }
 
     setTotal(subtotal.toFixed(2));
   };
 
-  // Buscar cliente por DNI
-  // Buscar cliente por DNI
   const buscarCliente = async () => {
     if (!dni) {
       alert("Por favor ingrese un DNI válido");
@@ -48,28 +47,29 @@ export const Pago = () => {
       } else {
         setCliente(null);
         setCupones([]);
-        alert("Cliente no encontrado o sin cupones");
+        alert("Cliente no encontrado o sin cupones disponibles");
       }
     } catch (error) {
       console.error("Error al buscar cliente:", error);
     }
   };
 
-
-
-  // Confirmar pago → guarda pedido en BD
   const confirmarPago = async () => {
+    if (!metodoPago) {
+      alert("Seleccioná un método de pago para continuar.");
+      return;
+    }
+
     try {
-      // Armamos el cuerpo del pedido con el formato que tu backend espera
       const productos = items.map((item) => ({
         id_producto: item.id_producto || item.id,
-        ingredientes_personalizados: item.ingredientes_personalizados || []
+        ingredientes_personalizados: item.ingredientes_personalizados || [],
       }));
 
       const pedidoBody = {
         productos,
         metodo_pago: metodoPago,
-        id_cliente: cliente ? cliente.id_cliente : 5 // invitado
+        id_cliente: cliente ? cliente.id_cliente : 5,
       };
 
       const response = await fetch("http://localhost:3000/api/pedidos", {
@@ -87,27 +87,20 @@ export const Pago = () => {
       } else {
         alert("❌ Error al crear el pedido: " + data.message);
       }
-
     } catch (error) {
       console.error("Error al confirmar el pedido:", error);
       alert("Ocurrió un error al procesar el pedido.");
     }
   };
 
-
-  const cancelarPago = () => {
-    if (confirm("¿Cancelar el pago y volver al carrito?")) {
-      window.location.href = "/Carrito";
-    }
-  };
-
   return (
     <div className="pago-container">
-      <h1 className="pago-titulo">💳 Pago del Pedido</h1>
+      {/* <h1 className="pago-titulo">Finalizá tu Pedido</h1> */}
 
-      {/* 🧍 Datos del cliente */}
+      {/* 🔎 DNI y descuentos */}
       <section className="pago-section">
-        <h2>🧾 Datos del Cliente</h2>
+        <h2>¿Eres socio McBurger?</h2>
+        <p className="texto-secundario">Ingresá tu DNI para ver tus descuentos o cupones disponibles.</p>
         <div className="dni-busqueda">
           <input
             type="text"
@@ -118,103 +111,87 @@ export const Pago = () => {
           <button className="btn-buscar" onClick={buscarCliente}>Buscar</button>
         </div>
 
-        {cliente ? (
+        {cliente && (
           <div className="cliente-info">
-            <p><b>Nombre:</b> {cliente.nombre}</p>
-            <p><b>DNI:</b> {cliente.dni}</p>
+            <p><b>Socio:</b> {cliente.nombre}</p>
+            {/* <p><b>DNI:</b> {cliente.dni}</p> */}
           </div>
-        ) : (
-          <p className="cliente-alerta">Cliente no encontrado — continuará como invitado.</p>
         )}
       </section>
 
       {/* 🎟️ Cupones */}
       {cupones.length > 0 && (
         <section className="pago-section">
-          <h2>🎟️ Cupones disponibles</h2>
-          <select
-            className="select-cupon"
-            onChange={(e) => {
-              const cupon = cupones.find((c) => c.idcupon === parseInt(e.target.value));
-              setCuponSeleccionado(cupon);
-              calcularTotal(items, cupon);
-            }}
-          >
-            <option value="">Seleccionar cupón</option>
+          <div className="cupones-container">
             {cupones.map((cupon) => (
-              <option key={cupon.idcupon} value={cupon.idcupon}>
-                {cupon.codigo} — {cupon.descuento}% desc.
-              </option>
+              <div
+                key={cupon.idcupon}
+                className={`cupon-card ${cuponSeleccionado?.idcupon === cupon.idcupon ? "seleccionado" : ""}`}
+                onClick={() => {
+                  setCuponSeleccionado(cupon);
+                  calcularTotal(items, cupon);
+                }}
+              >
+                {/* <h3>{cupon.codigo}</h3> */}
+                <p>Descuento: <b>{cupon.descuento}%</b></p>
+                {/* <p className="cupon-detalle">Válido hasta {cupon.fechavencimiento}</p> */}
+              </div>
             ))}
-          </select>
+          </div>
         </section>
       )}
 
-      {/* 🧾 Resumen del pedido */}
-      <section className="pago-section resumen">
-        <h2>🛍️ Resumen del pedido</h2>
-        <table className="tabla-resumen">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Descripción</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.nombre}</td>
-                <td>{item.descripcion}</td>
-                <td>${item.subtotal || item.precio}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {cuponSeleccionado && (
-          <p className="resumen-descuento">
-            Descuento aplicado: <b>{cuponSeleccionado.descuento}%</b>
-          </p>
-        )}
-        <h3 className="total-final">Total a pagar: ${total}</h3>
+      {/* 💰 Total */}
+      <section className="pago-section total">
+        <h2>Total a pagar</h2>
+        <h3 className="total-final">${total}</h3>
       </section>
 
-      {/* 💳 Método de pago */}
-      <section className="pago-section">
-        <h2>💰 Método de pago</h2>
-        <div className="metodos-pago">
-          <label>
-            <input
-              type="radio"
-              name="pago"
-              value="efectivo"
-              checked={metodoPago === "efectivo"}
-              onChange={() => setMetodoPago("efectivo")}
-            />
-            Efectivo
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="pago"
-              value="mercadopago"
-              checked={metodoPago === "mercadopago"}
-              onChange={() => setMetodoPago("mercadopago")}
-            />
-            Mercado Pago
-          </label>
+      {/* 💳 Métodos de pago */}
+      <div className="metodos-pago">
+        <h2>Elegí tu método de pago</h2>
+        <div className="metodos-container">
+          <div
+            className={`metodo-card ${metodoPago === "efectivo" ? "seleccionado" : ""}`}
+            onClick={() => setMetodoPago("efectivo")}
+          >
+            <div className="metodo-imagen">
+              <img src="/imagenes/efectivo.png" alt="Pago en efectivo" />
+            </div>
+            <div className="metodo-info">
+              <h3>Efectivo</h3>
+             {/*  <p>Pagarás en caja al finalizar tu pedido.</p> */}
+            </div>
+          </div>
+
+          <div
+            className={`metodo-card ${metodoPago === "mercadopago" ? "seleccionado" : ""}`}
+            onClick={() => setMetodoPago("mercadopago")}
+          >
+            <div className="metodo-imagen">
+              <img src="/imagenes/mercadopago.png" alt="Pago con Mercado Pago" />
+            </div>
+            <div className="metodo-info">
+              <h3>Mercado Pago</h3>
+              {/* <p>Paga aquí escaneando el código QR.</p> */}
+            </div>
+          </div>
         </div>
-      </section>
+
+        {!metodoPago && (
+          <p className="mensaje-seleccion">Seleccioná un método de pago para continuar.</p>
+        )}
+      </div>
 
       {/* 🔘 Botones finales */}
       <div className="botones-pago">
-        <button className="btn confirmar" onClick={confirmarPago}>✅ Confirmar Pago</button>
-        <button className="btn cancelar" onClick={cancelarPago}>❌ Cancelar</button>
+        <Link to="/Carrito">
+          <button className="btn cancelar">Cancelar</button>
+        </Link>
+        <button className="btn confirmar" onClick={confirmarPago}>Aceptar</button>
       </div>
     </div>
   );
-
 };
 
 export default Pago;
