@@ -183,25 +183,29 @@ export const Edicion2 = () => {
       });
 
       // Calcula subtotal a partir de ingredientes (si existen) o usando fallback
+      // Calcula subtotal a partir de ingredientes (si existen) o usando fallback
       const subtotalCalc = (() => {
+        const formatConComa = (num) => `$${num.toFixed(2).replace('.', ',')}`;
+
         if (Array.isArray(prodEdit.ingredientes) && prodEdit.ingredientes.length) {
           const s = prodEdit.ingredientes.reduce(
             (acc, ing) => acc + Number(ing.precio || 0) * Number(ing.cantidad || 0),
             0
           );
-          return `$${(s + 0.5).toFixed(2)}`; // sumar cargo fijo (ejemplo 0.5) y formatear con $
+          return formatConComa(s + 0.5); // sumar cargo fijo (ejemplo 0.5)
         }
         if (prodEdit.subtotal) {
           const num = Number(String(prodEdit.subtotal).replace(/[^0-9.]/g, ""));
-          return `$${num.toFixed(2)}`;
+          return formatConComa(num);
         }
         if (prodEdit.precio) {
           const p = Number(String(prodEdit.precio).replace(/[^0-9.]/g, ""));
           const cant = Number(prodEdit.cantidad || 1);
-          return `$${(p * cant).toFixed(2)}`;
+          return formatConComa(p * cant);
         }
-        return "$0.00";
+        return "$0,00";
       })();
+
 
 
       if (idx === -1) {
@@ -354,9 +358,10 @@ export const Edicion2 = () => {
                   (acc, ing) => acc + Number(ing.precio) * Number(ing.cantidad),
                   0
                 ) + 0.50
-              ).toFixed(2)}
+              ).toFixed(2).replace('.', ',')}
+
             </div>
- 
+
           </div>
         );
       })}

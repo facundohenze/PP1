@@ -27,14 +27,13 @@
   background-color: white;
   border-radius: 12px;
   padding: 16px 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  height: 160px;
+  height: 200px;
+  border: 3px solid #ccc;
 }
 
 .carrito-imagen {
   width: 110px;
   height: 90px;
-  
   border-radius: 8px;
 }
 
@@ -44,13 +43,13 @@
 }
 
 .carrito-nombre {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: bold;
   margin: 0;
 }
 
 .carrito-descripcion {
-  font-size: 17px;
+  font-size: 20px;
   color: #666;
   margin-top: 3px;
   margin-bottom: 0;
@@ -60,11 +59,11 @@
   margin: 0;
   font-weight: bold;
   color: #772424;
-  font-size: 19px;
+  font-size: 20px;
 }
 
 .carrito-precio {
-  font-size: 19px;
+  font-size: 22px;
   font-weight: bold;
   color: #28a745;
   margin-top: 6px;
@@ -78,7 +77,8 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  font-size: 15px;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .btn-eliminar:hover {

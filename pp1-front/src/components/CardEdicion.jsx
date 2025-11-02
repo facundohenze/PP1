@@ -149,17 +149,24 @@ export const CardEdicion = ({
     const cambiarTamano = (nuevoTamano) => {
       setTamano(nuevoTamano);
 
-      // Encontrar el nuevo precio (numérico)
-      const nuevoPrecio = parseFloat(
+      // Buscar el precio del tamaño seleccionado
+      const precioOriginal =
         productoGuardado?.opciones?.find(
           (opt) => opt.nombre.toLowerCase() === nuevoTamano.toLowerCase()
-        )?.precio || 0
+        )?.precio || productoGuardado?.precio || "0";
+
+      // Asegurar que se remuevan símbolos y se convierta la coma a punto
+      const precioNumerico = parseFloat(
+        precioOriginal.toString().replace("$", "").replace(",", ".")
       );
 
-      // Formatear el precio con signo $
-      const precioFormateado = `$${nuevoPrecio.toFixed(2)}`;
+      // Si no se pudo convertir, usar 0 como fallback
+      const precioValido = isNaN(precioNumerico) ? 0 : precioNumerico;
 
-      // Actualizar localStorage
+      // Formatear el precio con coma y signo $
+      const precioFormateado = `$${precioValido.toFixed(2).replace(".", ",")}`;
+
+      // Actualizar el carrito en localStorage
       const nuevoCarrito = carrito.map((item) =>
         item.id === id
           ? { ...item, tamano: nuevoTamano, precio: precioFormateado }
@@ -177,34 +184,34 @@ export const CardEdicion = ({
           <p className="tarjeta-descripcion">{descripcion}</p>
           <img src={imagen} alt={nombre} className="tarjeta-imagen img-inactiva" />
         </div>
-          <div className="tarjeta-controles">
-            {/* Tamaños */}
-            <div className="tamano-selector">
-              <button
-                className={tamano === "mediano" ? "activo" : ""}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  cambiarTamano("mediano");
-                }}
-              >
-                Mediano (${productoGuardado?.opciones?.find(o => o.nombre === "Mediano")?.precio || 0})
-              </button>
-              <button
-                className={tamano === "grande" ? "activo" : ""}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  cambiarTamano("grande");
-                }}
-              >
-                Grande (${productoGuardado?.opciones?.find(o => o.nombre === "Grande")?.precio || 0})
-              </button>
-            </div>
+        <div className="tarjeta-controles">
+          {/* Tamaños */}
+          <div className="tamano-selector">
+            <button
+              className={tamano === "mediano" ? "activo" : ""}
+              onClick={(e) => {
+                e.stopPropagation();
+                cambiarTamano("mediano");
+              }}
+            >
+              Mediano {productoGuardado?.opciones?.find(o => o.nombre === "Mediano")?.precio || 0}
+            </button>
+            <button
+              className={tamano === "grande" ? "activo" : ""}
+              onClick={(e) => {
+                e.stopPropagation();
+                cambiarTamano("grande");
+              }}
+            >
+              Grande {productoGuardado?.opciones?.find(o => o.nombre === "Grande")?.precio || 0}
+            </button>
+          </div>
 
-            {/* <p className="precio-actual">
+          {/* <p className="precio-actual">
               Precio actual: <b>${precioActual}</b>
             </p> */}
-          </div>
-        
+        </div>
+
       </div>
     );
   }

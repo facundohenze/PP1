@@ -250,3 +250,41 @@
   font-size: 13px;
   color: #777;
 }
+
+.accion-pago {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn-grande {
+  width: 80%;
+  max-width: 400px;
+  padding: 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-efectivo {
+  background-color: #27ae60;
+}
+
+.btn-mp {
+  background-color: #009ee3;
+}
+
+.btn-grande:hover {
+  opacity: 0.85;
+}
+
+.mensaje-seleccion {
+  text-align: center;
+  color: #666;
+  margin-top: 15px;
+  font-style: italic;
+}

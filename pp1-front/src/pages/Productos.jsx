@@ -11,7 +11,7 @@ export const Productos = () => {
         try {
             const response = await fetch("http://localhost:3000/api/productos", { method: "GET" });
             const data = await response.json();
-            console.log("🔍 Datos completos del fetch:", data);
+            /* console.log("🔍 Datos completos del fetch:", data); */
             if (data && data.data) {
                 setProductos(data.data);
             } else {

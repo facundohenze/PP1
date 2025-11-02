@@ -228,9 +228,8 @@ app.post('/api/pedidos', async (req, res) => {
         throw new Error(`El método de pago "${metodo_pago}" no existe`);
       }
 
-      // Calcular subtotales por cada producto individual
       for (const producto of productos) {
-        // Verificar que el producto existe
+        // Verificar que el producto existe en la BD
         const productoInfo = await sql`
           SELECT * FROM productos 
           WHERE id_producto = ${producto.id_producto};
@@ -240,33 +239,31 @@ app.post('/api/pedidos', async (req, res) => {
           throw new Error(`El producto con ID ${producto.id_producto} no existe`);
         }
 
-        // Calcular precio base (siempre 1 unidad por fila)
-        let subtotal = productoInfo[0].precio_base;
+        // ✅ Intentamos tomar el subtotal enviado desde el frontend
+        let subtotal = 0;
 
-        // Calcular precios de ingredientes extras
-        if (producto.ingredientes_personalizados && producto.ingredientes_personalizados.length > 0) {
-          for (const ingrediente of producto.ingredientes_personalizados) {
-            // Solo calcular para ingredientes extras
-            if (ingrediente.es_extra) {
-              const ingredienteInfo = await sql`
-                SELECT * FROM ingredientes
-                WHERE id_ingrediente = ${ingrediente.id_ingrediente};
-              `;
-
-              if (ingredienteInfo.length === 0) {
-                throw new Error(`El ingrediente con ID ${ingrediente.id_ingrediente} no existe`);
-              }
-
-              // Agregar costo de ingrediente extra
-              subtotal += ingredienteInfo[0].precio * ingrediente.cantidad;
-            }
-          }
+        if (producto.subtotal !== undefined && producto.subtotal !== null) {
+          // Limpia símbolos, convierte coma a punto y parsea número
+          subtotal = parseFloat(
+            producto.subtotal
+              .toString()
+              .replace(/[^\d,.-]/g, '') // elimina $ u otros símbolos
+              .replace(',', '.')
+          );
         }
 
-        // Actualizar subtotal del producto
+        // ⚙️ Si no vino válido, usa el precio_base del producto
+        if (isNaN(subtotal) || subtotal <= 0) {
+          subtotal = parseFloat(productoInfo[0].precio_base);
+        }
+
+
         producto.subtotal = subtotal;
         total += subtotal;
       }
+
+      
+
 
       // Crear nuevo pedido (usando TIMESTAMP en lugar de epoch si ya cambiaste la BD)
       const nuevoPedido = await sql`

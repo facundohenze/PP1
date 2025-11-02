@@ -19,17 +19,30 @@ export const Pago = () => {
 
   const calcularTotal = (carrito, cupon = null) => {
     let subtotal = carrito.reduce((acc, item) => {
-      const precio = item.subtotal || item.precio || 0;
-      const valor = typeof precio === "string" ? parseFloat(precio.replace("$", "")) : parseFloat(precio);
+      // Obtener precio en formato texto o número
+      const precioBruto = item.subtotal || item.precio || 0;
+
+      // Convertir correctamente tanto "$5,70" como "5.70"
+      const valor = parseFloat(
+        precioBruto
+          .toString()
+          .replace("$", "")
+          .replace(",", ".") // <- importante: convierte coma a punto
+      );
+
       return acc + (isNaN(valor) ? 0 : valor);
     }, 0);
 
+    // Aplicar descuento si hay cupón
     if (cupon && cupon.descuento) {
       subtotal -= subtotal * (cupon.descuento / 100);
     }
 
-    setTotal(subtotal.toFixed(2));
+    // Guardar total con coma (para mostrar como "$5,70")
+    const totalFormateado = subtotal.toFixed(2).replace(".", ",");
+    setTotal(totalFormateado);
   };
+
 
   const buscarCliente = async () => {
     if (!dni) {
@@ -64,12 +77,31 @@ export const Pago = () => {
       const productos = items.map((item) => ({
         id_producto: item.id_producto || item.id,
         ingredientes_personalizados: item.ingredientes_personalizados || [],
+        subtotal: parseFloat(
+          (item.subtotal || item.precio || "0")
+            .toString()
+            .replace("$", "")
+            .replace(",", ".")
+        ),
       }));
+
+      // ✅ Calcular el total original
+      const totalSinDescuento = productos.reduce(
+        (acc, p) => acc + (p.subtotal || 0),
+        0
+      );
+
+      // ✅ Aplicar descuento si hay cupón
+      const descuento = cuponSeleccionado ? parseFloat(cuponSeleccionado.descuento || 0) : 0;
+      const totalFinal = Math.max(totalSinDescuento - descuento, 0);
 
       const pedidoBody = {
         productos,
         metodo_pago: metodoPago,
         id_cliente: cliente ? cliente.id_cliente : 5,
+        total: totalFinal,
+        cupon: cuponSeleccionado ? cuponSeleccionado.codigo : null, // opcional
+        descuento: descuento > 0 ? descuento : null, // opcional
       };
 
       const response = await fetch("http://localhost:3000/api/pedidos", {
@@ -92,6 +124,7 @@ export const Pago = () => {
       alert("Ocurrió un error al procesar el pedido.");
     }
   };
+
 
   return (
     <div className="pago-container">
@@ -145,11 +178,13 @@ export const Pago = () => {
       <section className="pago-section total">
         <h2>Total a pagar</h2>
         <h3 className="total-final">${total}</h3>
+
       </section>
 
       {/* 💳 Métodos de pago */}
       <div className="metodos-pago">
         <h2>Elegí tu método de pago</h2>
+
         <div className="metodos-container">
           <div
             className={`metodo-card ${metodoPago === "efectivo" ? "seleccionado" : ""}`}
@@ -160,7 +195,6 @@ export const Pago = () => {
             </div>
             <div className="metodo-info">
               <h3>Efectivo</h3>
-             {/*  <p>Pagarás en caja al finalizar tu pedido.</p> */}
             </div>
           </div>
 
@@ -173,7 +207,6 @@ export const Pago = () => {
             </div>
             <div className="metodo-info">
               <h3>Mercado Pago</h3>
-              {/* <p>Paga aquí escaneando el código QR.</p> */}
             </div>
           </div>
         </div>
@@ -181,14 +214,29 @@ export const Pago = () => {
         {!metodoPago && (
           <p className="mensaje-seleccion">Seleccioná un método de pago para continuar.</p>
         )}
+
+        {/* 🔘 Botón dinámico según método */}
+        {metodoPago && (
+          <div className="accion-pago">
+            {metodoPago === "efectivo" ? (
+              <button className="btn-grande btn-efectivo" onClick={confirmarPago}>
+                Pagar
+              </button>
+            ) : (
+              <button className="btn-grande btn-mp" onClick={confirmarPago}>
+                Escanear QR
+              </button>
+            )}
+          </div>
+        )}
       </div>
+
 
       {/* 🔘 Botones finales */}
       <div className="botones-pago">
         <Link to="/Carrito">
           <button className="btn cancelar">Cancelar</button>
         </Link>
-        <button className="btn confirmar" onClick={confirmarPago}>Aceptar</button>
       </div>
     </div>
   );
