@@ -91,17 +91,25 @@ export const Pago = () => {
         0
       );
 
-      // ✅ Aplicar descuento si hay cupón
-      const descuento = cuponSeleccionado ? parseFloat(cuponSeleccionado.descuento || 0) : 0;
-      const totalFinal = Math.max(totalSinDescuento - descuento, 0);
+      // ✅ Aplicar descuento como porcentaje real
+      let descuento = 0;
+      let totalFinal = totalSinDescuento;
+
+      if (cuponSeleccionado && cuponSeleccionado.descuento) {
+        const porcentaje = parseFloat(cuponSeleccionado.descuento);
+        if (!isNaN(porcentaje) && porcentaje > 0) {
+          descuento = (totalSinDescuento * porcentaje) / 100; // 🔹 calculamos monto de descuento
+          totalFinal = totalSinDescuento - descuento;
+        }
+      }
 
       const pedidoBody = {
         productos,
         metodo_pago: metodoPago,
         id_cliente: cliente ? cliente.id_cliente : 5,
-        total: totalFinal,
-        cupon: cuponSeleccionado ? cuponSeleccionado.codigo : null, // opcional
-        descuento: descuento > 0 ? descuento : null, // opcional
+        total: parseFloat(totalFinal.toFixed(2)),  // 🔹 aseguramos número válido
+        cupon: cuponSeleccionado ? cuponSeleccionado.codigo : null,
+        descuento: parseFloat(descuento.toFixed(2)), // 🔹 enviamos monto descontado
       };
 
       const response = await fetch("http://localhost:3000/api/pedidos", {

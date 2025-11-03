@@ -176,7 +176,7 @@ app.get('/api/pedidos/:id', async (req, res) => {
 
 // 3. Crear un nuevo pedido (MODIFICADO)
 app.post('/api/pedidos', async (req, res) => {
-  const { productos, metodo_pago, id_cliente } = req.body;
+  const { productos, metodo_pago, id_cliente, descuento = 0 } = req.body; // 👈 agregamos descuento
 
   // Validaciones básicas
   if (!productos || !Array.isArray(productos) || productos.length === 0) {
@@ -193,43 +193,38 @@ app.post('/api/pedidos', async (req, res) => {
     });
   }
 
-  // Si no se proporciona cliente, usar el cliente invitado (ID 5 según nuestro script)
   const clienteId = id_cliente || 5;
 
-  // Usar transacción para garantizar la integridad
   try {
     return await sql.begin(async (sql) => {
       let total = 0;
 
-      // Verificar que el cliente existe
+      // Verificar cliente
       const clienteInfo = await sql`
         SELECT * FROM clientes WHERE id_cliente = ${clienteId};
       `;
-
       if (clienteInfo.length === 0) {
         throw new Error(`El cliente con ID ${clienteId} no existe`);
       }
 
-      // Obtener el ID del estado "pendiente"
+      // Obtener estado pendiente
       const estadoPendiente = await sql`
         SELECT id_estado FROM estado_pedido WHERE nombre = 'pendiente';
       `;
-
       if (estadoPendiente.length === 0) {
         throw new Error('No se encontró el estado "pendiente" en la base de datos');
       }
 
-      // Obtener ID del tipo de pago
+      // Obtener tipo de pago
       const tipoPago = await sql`
         SELECT idtipopago FROM tipopago WHERE nombre = ${metodo_pago};
       `;
-
       if (tipoPago.length === 0) {
         throw new Error(`El método de pago "${metodo_pago}" no existe`);
       }
 
+      // 🔹 Calcular total sumando subtotales de productos
       for (const producto of productos) {
-        // Verificar que el producto existe en la BD
         const productoInfo = await sql`
           SELECT * FROM productos 
           WHERE id_producto = ${producto.id_producto};
@@ -239,40 +234,53 @@ app.post('/api/pedidos', async (req, res) => {
           throw new Error(`El producto con ID ${producto.id_producto} no existe`);
         }
 
-        // ✅ Intentamos tomar el subtotal enviado desde el frontend
         let subtotal = 0;
-
         if (producto.subtotal !== undefined && producto.subtotal !== null) {
-          // Limpia símbolos, convierte coma a punto y parsea número
           subtotal = parseFloat(
             producto.subtotal
               .toString()
-              .replace(/[^\d,.-]/g, '') // elimina $ u otros símbolos
+              .replace(/[^\d,.-]/g, '')
               .replace(',', '.')
           );
         }
 
-        // ⚙️ Si no vino válido, usa el precio_base del producto
         if (isNaN(subtotal) || subtotal <= 0) {
           subtotal = parseFloat(productoInfo[0].precio_base);
         }
-
 
         producto.subtotal = subtotal;
         total += subtotal;
       }
 
-      
+      // 🔸 Aplicar descuento (si viene del frontend)
+      if (descuento !== undefined && descuento !== null) {
+        let descuentoNumerico = descuento;
 
+        // Si viene como texto ($, puntos o comas)
+        if (typeof descuento === "string") {
+          descuentoNumerico = parseFloat(
+            descuento
+              .toString()
+              .replace(/[^\d,.-]/g, '') // elimina símbolos o letras
+              .replace(',', '.')
+          );
+        }
 
-      // Crear nuevo pedido (usando TIMESTAMP en lugar de epoch si ya cambiaste la BD)
+        // Validar antes de aplicar
+        if (!isNaN(descuentoNumerico) && descuentoNumerico > 0) {
+          total -= descuentoNumerico;
+          if (total < 0) total = 0; // evitar totales negativos
+        }
+      }
+
+      // 🔹 Crear pedido
       const nuevoPedido = await sql`
         INSERT INTO pedidos (fecha_hora, total, id_cliente, id_estado)
         VALUES (CURRENT_TIMESTAMP, ${total}, ${clienteId}, ${estadoPendiente[0].id_estado})
         RETURNING *;
       `;
 
-      // Crear registro de pago
+      // 🔹 Crear pago
       const nuevoPago = await sql`
         INSERT INTO pago (idpedido, idtipopago, monto, descripcion)
         VALUES (
@@ -284,7 +292,7 @@ app.post('/api/pedidos', async (req, res) => {
         RETURNING *;
       `;
 
-      // Insertar productos del pedido (cada producto como fila individual)
+      // 🔹 Insertar productos del pedido
       const productosCreados = [];
       for (const producto of productos) {
         const nuevoPedidoProducto = await sql`
@@ -300,7 +308,7 @@ app.post('/api/pedidos', async (req, res) => {
 
         productosCreados.push(nuevoPedidoProducto[0]);
 
-        // Insertar ingredientes personalizados
+        // 🔹 Insertar ingredientes personalizados
         if (producto.ingredientes_personalizados && producto.ingredientes_personalizados.length > 0) {
           for (const ingrediente of producto.ingredientes_personalizados) {
             await sql`
@@ -344,6 +352,7 @@ app.post('/api/pedidos', async (req, res) => {
     });
   }
 });
+
 
 // 4. Actualizar el estado de un pedido (CORREGIDO)
 app.patch('/api/pedidos/:id/estado', async (req, res) => {

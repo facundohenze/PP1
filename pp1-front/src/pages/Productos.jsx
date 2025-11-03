@@ -24,7 +24,7 @@ export const Productos = () => {
             setLoading(false);
         }
     };
-
+    
     useEffect(() => {
         fetchProductos();
     }, []);
