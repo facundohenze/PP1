@@ -1,0 +1,38 @@
+.selector-idioma {
+  text-align: center;
+  margin-bottom: 20px;
+  width: 800px;
+  height: 250px;
+  border-radius: 15px;
+}
+
+.idiomas-botones {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.idiomas-botones button {
+  height: 110px;
+  width: 180px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 25px;
+  transition: all 0.2s ease;
+}
+
+.idiomas-botones button.activo {
+  background-color: #ffce00;
+  font-weight: bold;
+}
+
+.idiomas-botones button:hover {
+  opacity: 0.8;
+}
+
+.selector-idioma h3 {
+  color:azure;
+  font-size: 40px;
+  margin-bottom: 40px;
+}

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { useIdioma } from "./IdiomaContex.jsx";
 import "../estilos/barraSeleccion.css";
 
 const BarraSeleccion = () => {
   const [items, setItems] = useState([]);
-
+  const { t } = useIdioma();
   const cargarCarrito = () => {
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     setItems(carrito);
@@ -46,7 +47,7 @@ const BarraSeleccion = () => {
         ))
       ) : (
         
-        <p className="vacio">Tu orden está vacía</p>
+        <p className="vacio">{t("orden_vacia")}</p>
         
       )}
     </div>

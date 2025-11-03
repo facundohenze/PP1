@@ -3,6 +3,7 @@ import { useEffect, useState, useContext, useCallback } from "react";
 import { useLocation } from "react-router-dom"; // Para leer location.state
 import "../estilos/edicion.css"; // Estilos de la vista de edición
 import { EdicionContext } from "../context/EdicionContext"; // Contexto para registrar handlers (cancelar/guardar)
+import { useIdioma } from "../components/IdiomaContex.jsx";
 
 export const Edicion2 = () => {
   const { register, unregister } = useContext(EdicionContext); // Registrar funciones para Layout
@@ -14,6 +15,7 @@ export const Edicion2 = () => {
   const [loading, setLoading] = useState(true); // Indicador de carga
   const excluirIds = [1]; // Ejemplo: ids de ingredientes a excluir
   const [total, setTotal] = useState(0);
+  const { t } = useIdioma();
 
   const idsExtrasProd1 = [9, 10, 13, 14, 15]; // IDs de ingredientes extra para el producto con id 1
   const idsExtrasProd2 = [10, 12, 13, 15]; // IDs de ingredientes extra para el producto con id 2
@@ -272,12 +274,12 @@ export const Edicion2 = () => {
               <table className="tabla-ingredientes">
                 <thead>
                   <tr className="titulo-tabla">
-                    <th colspan="4">Ingredientes del producto</th>
+                    <th colspan="4">{t("ingredientes_producto")}</th>
                   </tr>
                   <br />
                   <tr>
-                    <th style={{ width: "140px" }}>Cantidad</th>
-                    <th>Ingredientes</th>
+                    <th style={{ width: "140px" }}>{t("cantidad_ingredientes")}</th>
+                    <th>{t("ingredientes")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -300,11 +302,11 @@ export const Edicion2 = () => {
               <table className="tabla-extras">
                 <thead>
                   <tr className="titulo-tabla">
-                    <th colSpan="3">Extras disponibles</th>
+                    <th colSpan="3">{t("extras_disponibles")}</th>
                   </tr>
                   <br />
                   <tr>
-                    <th>Ingredientes</th>
+                    <th>{t("ingredientes")}</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -336,7 +338,7 @@ export const Edicion2 = () => {
                               );
                             }}
                           >
-                            Agregar
+                            {t("agregar")}
                           </button>
                         </td>
                       </tr>

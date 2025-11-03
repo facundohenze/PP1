@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import "../estilos/pago.css";
+import { useIdioma } from "../components/IdiomaContex.jsx";
 
 export const Pago = () => {
   const [dni, setDni] = useState("");
@@ -12,6 +13,7 @@ export const Pago = () => {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const navigate = useNavigate(); // para redirigir tras el pago
+  const { t } = useIdioma();
 
   useEffect(() => {
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -152,16 +154,16 @@ export const Pago = () => {
 
       {/* 🔎 DNI y descuentos */}
       <section className="pago-section">
-        <h2>¿Eres socio McBurger?</h2>
-        <p className="texto-secundario">Ingresá tu DNI para ver tus descuentos o cupones disponibles.</p>
+        <h2>{t("socio_mcburger")}</h2>
+        <p className="texto-secundario">{t("ingresar_dni")}</p>
         <div className="dni-busqueda">
           <input
             type="text"
-            placeholder="Ingrese su DNI"
+            placeholder={t("ingrese_dni")}
             value={dni}
             onChange={(e) => setDni(e.target.value)}
           />
-          <button className="btn-buscar" onClick={buscarCliente}>Buscar</button>
+          <button className="btn-buscar" onClick={buscarCliente}>{t("buscar")}</button>
         </div>
 
         {cliente && (
@@ -186,7 +188,7 @@ export const Pago = () => {
                 }}
               >
                 {/* <h3>{cupon.codigo}</h3> */}
-                <p>Descuento: <b>{cupon.descuento}%</b></p>
+                <p>{t("descuento")}: <b>{cupon.descuento}%</b></p>
                 {/* <p className="cupon-detalle">Válido hasta {cupon.fechavencimiento}</p> */}
               </div>
             ))}
@@ -196,14 +198,14 @@ export const Pago = () => {
 
       {/* 💰 Total */}
       <section className="pago-section total">
-        <h2>Total a pagar</h2>
+        <h2>{t("total_a_pagar")}</h2>
         <h3 className="total-final">${total}</h3>
 
       </section>
 
       {/* 💳 Métodos de pago */}
       <div className="metodos-pago">
-        <h2>Elegí tu método de pago</h2>
+        <h2>{t("metodo_pago")}</h2>
 
         <div className="metodos-container">
           <div
@@ -214,7 +216,7 @@ export const Pago = () => {
               <img src="/imagenes/efectivo.png" alt="Pago en efectivo" />
             </div>
             <div className="metodo-info">
-              <h3>Efectivo</h3>
+              <h3>{t("efectivo")}</h3>
             </div>
           </div>
 
@@ -226,13 +228,13 @@ export const Pago = () => {
               <img src="/imagenes/mercadopago.png" alt="Pago con Mercado Pago" />
             </div>
             <div className="metodo-info">
-              <h3>Mercado Pago</h3>
+              <h3>QR</h3>
             </div>
           </div>
         </div>
 
         {!metodoPago && (
-          <p className="mensaje-seleccion">Seleccioná un método de pago para continuar.</p>
+          <p className="mensaje-seleccion">{t("selecciona_metodo")}</p>
         )}
 
         {/* 🔘 Botón dinámico según método */}
@@ -244,7 +246,7 @@ export const Pago = () => {
               </button>
             ) : (
               <button className="btn-grande btn-mp" onClick={confirmarPago}>
-                Escanear QR
+                Escanear
               </button>
             )}
           </div>
@@ -255,7 +257,7 @@ export const Pago = () => {
       {/* 🔘 Botones finales */}
       <div className="botones-pago">
         <Link to="/Carrito">
-          <button className="btn cancelar">Cancelar</button>
+          <button className="btn cancelar">{t("cancelar")}</button>
         </Link>
       </div>
     </div>

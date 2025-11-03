@@ -6,16 +6,22 @@ import BarraSeleccion from "./BarraSeleccion";
 import { useContext, useState } from "react";
 import { EdicionContext } from "../context/EdicionContext";
 import { useNavigate } from "react-router-dom";
+import { useIdioma } from "./IdiomaContex.jsx";
 
 
 export const Layout = ({ children }) => {
+    const { t } = useIdioma();
     const location = useLocation();
     const pathname = location.pathname || "/";
     const { cancelar, guardar } = useContext(EdicionContext);
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
     const [totalEdicion, setTotalEdicion] = useState(0); // añadido para evitar referencia indefinida
-
+    const [mensajeError, setMensajeError] = useState("");
+    const volverInicio = () => {
+        localStorage.removeItem("carrito");
+        navigate("/");
+    };
     // ahora usamos matching robusto:
     const mostrar1 = ["/Productos", "/Extras", "/Edicion", "/Carrito", "/Edicion2", "/Pago"].includes(pathname)
         || pathname.startsWith("/PagoExitoso");
@@ -31,7 +37,6 @@ export const Layout = ({ children }) => {
         const handleStorageChange = () => {
             setTotalEdicion(Number(localStorage.getItem("precio")) || 0);
         };
-
         window.addEventListener("storage", handleStorageChange);
         return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
@@ -54,7 +59,7 @@ export const Layout = ({ children }) => {
             <main className="layout-main">
                 {mostrar4 && (
                     <main className="layout-top">
-                        <h1>Tu pedido</h1>
+                        <h1>{t("tu_pedido")}</h1>
                     </main>
                 )}
 
@@ -74,16 +79,34 @@ export const Layout = ({ children }) => {
                 <div className="footer-buttons">
                     <div className="boton-cancelar-pedido">
                         <Link to="/Inicio">
-                            <button>Cancelar Pedido</button>
+                            <button onClick={volverInicio}>{t("cancelar_pedido")}</button>
                         </Link>
                     </div>
-                    <Link to="/Edicion">
-                        <button>Editar Selección</button>
-                    </Link>
+                    <button
+                        onClick={() => {
+                            const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+                            if (carrito.length === 0) {
+                                return; // no hace nada
+                            }
+                            // ✅ Si hay productos, redirige al carrito
+                            window.location.href = "/Edicion";
+                        }}
+                    >
+                        {t("editar_seleccion")}
+                    </button>
                     <div className="boton-aceptar-pedido">
-                        <Link to="/Carrito">
-                            <button>Agregar al Pedido</button>
-                        </Link>
+                        <button
+                            onClick={() => {
+                                const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+                                if (carrito.length === 0) {
+                                    return; // no hace nada
+                                }
+                                // ✅ Si hay productos, redirige al carrito
+                                window.location.href = "/Carrito";
+                            }}
+                        >
+                            {t("agregar_pedido")}
+                        </button>
                     </div>
                 </div>
             )}
@@ -100,7 +123,7 @@ export const Layout = ({ children }) => {
                 <div className="footer-buttons-carrito">
                     <div className="boton-cancelar-pedido">
                         <Link to="/Inicio">
-                            <button>Cancelar Pedido</button>
+                            <button onClick={volverInicio}>{t("cancelar_pedido")}</button>
                         </Link>
                     </div>
                     <Link to="/Productos">
@@ -108,7 +131,7 @@ export const Layout = ({ children }) => {
                     </Link>
                     <div className="boton-aceptar-pedido">
                         <Link to="/Carrito">
-                            <button>Agregar al Pedido</button>
+                            <button>{t("agregar_pedido")}</button>
                         </Link>
                     </div>
 
@@ -140,7 +163,7 @@ export const Layout = ({ children }) => {
                             }}
                             disabled={saving}
                         >
-                            Cancelar Edicion
+                            {t("cancelar_edicion")}
                         </button>
                     </div>
 
@@ -157,7 +180,7 @@ export const Layout = ({ children }) => {
                             }}
                             disabled={saving}
                         >
-                            {saving ? "Guardando..." : "Confirmar Edicion"}
+                            {saving ? t("guardando") : t("confirmar_edicion")}
                         </button>
                     </div>
 
@@ -173,7 +196,7 @@ export const Layout = ({ children }) => {
                 <div className="footer-buttons-carrito">
                     <div className="boton-cancelar-pedido">
                         <Link to="/Inicio">
-                            <button>Cancelar Pedido</button>
+                            <button onClick={volverInicio}>{t("cancelar_pedido")}</button>
                         </Link>
                     </div>
                     <Link to="/Productos">
@@ -181,7 +204,7 @@ export const Layout = ({ children }) => {
                     </Link>
                     <div className="boton-aceptar-pedido">
                         <Link to="/Pago">
-                            <button>Confirmar Pedido</button>
+                            <button>{t("confirmar_pedido")}</button>
                         </Link>
                     </div>
                 </div>

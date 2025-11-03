@@ -320,12 +320,12 @@
 
 .boton-editar {
   width: 100%;
-  background-color: #007bff;
+  background-color: #772424;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   height: 40px;
   transition: background-color 0.3s ease;

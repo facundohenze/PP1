@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIdioma } from "./IdiomaContex.jsx";
 import "../estilos/cardEdicion.css";
 
 export const Card = ({
@@ -13,6 +14,7 @@ export const Card = ({
 }) => {
   const [cantidad, setCantidad] = useState(1);
   const [tamano, setTamano] = useState(null);
+  const { t } = useIdioma();
 
   // 🔹 Mantiene el valor numérico limpio
   const precioNumero = Number(precio.replace(/[^0-9.]/g, ""));
@@ -117,10 +119,11 @@ export const Card = ({
       {!activa && categoria !== "hamburguesa" && (
         <div className="tamano-precios">
           <span className="precio-mediano">
-            Mediano: {mostrarPrecio(precioNumero.toFixed(2))}
+            {t("mediano")}: {mostrarPrecio(precioNumero.toFixed(2))}
+
           </span>
           <span className="precio-grande">
-            Grande: {mostrarPrecio(precioGrande)}
+            {t("grande")}: {mostrarPrecio(precioGrande)}
           </span>
         </div>
       )}
@@ -143,7 +146,7 @@ export const Card = ({
                   setTamano("mediano");
                 }}
               >
-                Mediano ({mostrarPrecio(precioNumero.toFixed(2))})
+                {t("mediano")} {mostrarPrecio(precioNumero.toFixed(2))}
               </button>
               <button
                 className={tamano === "grande" ? "activo" : ""}
@@ -152,14 +155,14 @@ export const Card = ({
                   setTamano("grande");
                 }}
               >
-                Grande ({mostrarPrecio(precioGrande)})
+                {t("grande")} {mostrarPrecio(precioGrande)}
               </button>
             </div>
           )}
 
           {categoria !== "hamburguesa" && !tamano && (
             <div className="mensaje-seleccionar">
-              <span>Selecciona un tamaño primero</span>
+              <span>{t("seleccionaTamano")}</span>
             </div>
           )}
 
@@ -198,10 +201,10 @@ export const Card = ({
                 confirmar();
               }}
             >
-              Confirmar
+              {t("confirmar")}
             </button>
             <button className="boton-cancelar" onClick={cancelar}>
-              Cancelar
+              {t("cancelar")}
             </button>
           </div>
         </div>

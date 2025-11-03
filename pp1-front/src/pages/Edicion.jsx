@@ -5,6 +5,7 @@ import "../estilos/edicion.css";
 import { CardEdicion } from "../components/CardEdicion";
 import { useLocation } from "react-router-dom";
 
+
 // Página que muestra los items del carrito como tarjetas para editar
 export const Edicion = () => {
   const [productos, setProductos] = useState([]); // items leídos desde localStorage o DB

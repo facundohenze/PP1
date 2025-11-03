@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import "../estilos/carrito.css";
+import { useIdioma } from "../components/IdiomaContex.jsx";
 
 export const Carrito = () => {
     const [items, setItems] = useState([]);
-
+    const { t } = useIdioma();
     const cargarItems = () => {
         const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
         setItems(carrito);
@@ -18,6 +19,10 @@ export const Carrito = () => {
         const nuevoCarrito = carritoActual.filter((_, i) => i !== index);
         localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
         setItems(nuevoCarrito);
+        // 👇 Si ya no quedan productos, redirige
+        if (nuevoCarrito.length === 0) {
+            window.location.href = "/Productos";
+        }
     };
 
     // 🔹 Calcular total corrigiendo formato decimal (coma o punto)
@@ -60,7 +65,7 @@ export const Carrito = () => {
                                 className="btn-eliminar"
                                 onClick={() => eliminarProducto(idx)}
                             >
-                                Eliminar
+                                {t("eliminar")}
                             </button>
                         </div>
                     ))}
@@ -73,3 +78,4 @@ export const Carrito = () => {
         </div>
     );
 };
+

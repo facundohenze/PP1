@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../estilos/cardEdicion.css";
+import { useIdioma } from "./IdiomaContex.jsx";
 
 // ...existing code...
 export const CardEdicion = ({
@@ -16,6 +17,7 @@ export const CardEdicion = ({
 }) => {
   // ids que consideramos "extras" (según tu pedido)
   const extrasIds = new Set([4, 5, 6, 7, 8, 9, 10]);
+   const { t } = useIdioma();
 
   // estado UI
   const [activa, setActiva] = useState(false); // mostrar controles dentro de la card
@@ -194,7 +196,7 @@ export const CardEdicion = ({
                 cambiarTamano("mediano");
               }}
             >
-              Mediano {productoGuardado?.opciones?.find(o => o.nombre === "Mediano")?.precio || 0}
+              {t("mediano")} {productoGuardado?.opciones?.find(o => o.nombre === "Mediano")?.precio || 0}
             </button>
             <button
               className={tamano === "grande" ? "activo" : ""}
@@ -203,7 +205,7 @@ export const CardEdicion = ({
                 cambiarTamano("grande");
               }}
             >
-              Grande {productoGuardado?.opciones?.find(o => o.nombre === "Grande")?.precio || 0}
+              {t("grande")} {productoGuardado?.opciones?.find(o => o.nombre === "Grande")?.precio || 0}
             </button>
           </div>
 
@@ -242,7 +244,7 @@ export const CardEdicion = ({
         }}
       >
         <button className="boton-editar">
-          Personalizar
+          {t("personalizar")}
         </button>
       </Link>
     </div>
