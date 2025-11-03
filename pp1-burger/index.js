@@ -144,7 +144,7 @@ app.get('/api/pedidos/:id', async (req, res) => {
             ppi.es_extra,
             i.nombre,
             i.descripcion,
-            i.precio,
+            i.precio
           FROM pedidos_productos_ingredientes ppi
           JOIN ingredientes i ON ppi.id_ingrediente = i.id_ingrediente
           WHERE ppi.id_pedido_producto = ${producto.id_pedido_producto};

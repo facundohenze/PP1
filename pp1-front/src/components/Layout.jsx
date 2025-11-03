@@ -10,22 +10,26 @@ import { useNavigate } from "react-router-dom";
 
 export const Layout = ({ children }) => {
     const location = useLocation();
+    const pathname = location.pathname || "/";
     const { cancelar, guardar } = useContext(EdicionContext);
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
+    const [totalEdicion, setTotalEdicion] = useState(0); // añadido para evitar referencia indefinida
 
-    const mostrar1 = location.pathname === "/Productos" || location.pathname === "/Extras" || location.pathname === "/Edicion" ||
-        location.pathname === "/Carrito" || location.pathname === "/Edicion2" || location.pathname === "/Pago";
-    const mostrar2 = location.pathname === "/Productos" || location.pathname === "/Extras";
-    const mostrar3 = location.pathname === "/Productos" || location.pathname === "/Extras";
-    const mostrar4 = location.pathname === "/Carrito";
-    const mostrar5 = location.pathname === "/Edicion";
-    const mostrar6 = location.pathname === "/Edicion2";
-    const mostrar7 = location.pathname === "/Pago";
+    // ahora usamos matching robusto:
+    const mostrar1 = ["/Productos", "/Extras", "/Edicion", "/Carrito", "/Edicion2", "/Pago"].includes(pathname)
+        || pathname.startsWith("/PagoExitoso");
+    const mostrar2 = ["/Productos", "/Extras"].includes(pathname);
+    const mostrar3 = ["/Productos", "/Extras"].includes(pathname);
+    const mostrar4 = pathname === "/Carrito";
+    const mostrar5 = pathname === "/Edicion";
+    const mostrar6 = pathname === "/Edicion2";
+    const mostrar7 = pathname === "/Pago";
+    const mostrar8 = pathname.startsWith("/PagoExitoso"); // true para /PagoExitoso/:id_pedido
 
     useEffect(() => {
         const handleStorageChange = () => {
-            setTotalEdicion(localStorage.getItem("precio") || 0);
+            setTotalEdicion(Number(localStorage.getItem("precio")) || 0);
         };
 
         window.addEventListener("storage", handleStorageChange);
@@ -35,10 +39,9 @@ export const Layout = ({ children }) => {
     return (
         <div className="layout">
 
-            {/* {mostrar && ()} */}
             {mostrar1 && (
                 <header className="layout-header">
-                    <img src="public\imagenes\logo.png" alt="Logo" />
+                    <img src="/imagenes/logo.png" alt="Logo" />
                 </header>
             )}
 
@@ -117,6 +120,11 @@ export const Layout = ({ children }) => {
                 </div>
             )}
 
+            {mostrar8 && (
+                <div className="footer-buttons-carrito">
+                </div>
+            )}
+
             {mostrar6 && (
                 <main className="layout-footer-carrito">
                 </main>
@@ -125,8 +133,6 @@ export const Layout = ({ children }) => {
             {mostrar6 && (
                 <div className="footer-buttons-carrito">
                     <div className="boton-cancelar-pedido">
-                        {/* llamar cancelar y luego navegar */
-                        /* quitar Link para evitar navegar antes de ejecutar cancelar */}
                         <button
                             onClick={() => {
                                 cancelar();
@@ -139,12 +145,11 @@ export const Layout = ({ children }) => {
                     </div>
 
                     <div className="boton-aceptar-pedido">
-                        {/* esperar a guardar antes de navegar; manejar estado de guardado */}
                         <button
                             onClick={async () => {
                                 setSaving(true);
                                 try {
-                                    await guardar(); // funciona si guardar es sync o async
+                                    await guardar();
                                     navigate("/Edicion");
                                 } finally {
                                     setSaving(false);
@@ -161,7 +166,6 @@ export const Layout = ({ children }) => {
 
             {mostrar4 && (
                 <main className="layout-footer-carrito">
-                    {/* <h1>total</h1> */}
                 </main>
             )}
 

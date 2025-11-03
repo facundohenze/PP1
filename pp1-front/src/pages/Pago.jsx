@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../estilos/pago.css";
 
 export const Pago = () => {
@@ -10,6 +11,7 @@ export const Pago = () => {
   const [metodoPago, setMetodoPago] = useState(null);
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
+  const navigate = useNavigate(); // para redirigir tras el pago
 
   useEffect(() => {
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -55,8 +57,14 @@ export const Pago = () => {
       const data = await res.json();
 
       if (data.status === "OK" && data.data.length > 0) {
-        setCliente({ nombre: data.data[0].nombre, dni });
-        setCupones(data.data);
+        const clienteEncontrado = data.data[0];
+        setCliente({
+          id_cliente: clienteEncontrado.id_cliente, // ✅ importante
+          nombre: clienteEncontrado.nombre,
+          dni: clienteEncontrado.dni,
+        });
+
+        setCupones(data.data); // cupones asociados a ese cliente
       } else {
         setCliente(null);
         setCupones([]);
@@ -66,6 +74,7 @@ export const Pago = () => {
       console.error("Error al buscar cliente:", error);
     }
   };
+
 
   const confirmarPago = async () => {
     if (!metodoPago) {
@@ -106,7 +115,10 @@ export const Pago = () => {
       const pedidoBody = {
         productos,
         metodo_pago: metodoPago,
-        id_cliente: cliente ? cliente.id_cliente : 5,
+        id_cliente:
+          cuponSeleccionado && cliente
+            ? cliente.id_cliente
+            : 7, // cliente genérico
         total: parseFloat(totalFinal.toFixed(2)),  // 🔹 aseguramos número válido
         cupon: cuponSeleccionado ? cuponSeleccionado.codigo : null,
         descuento: parseFloat(descuento.toFixed(2)), // 🔹 enviamos monto descontado
@@ -121,12 +133,12 @@ export const Pago = () => {
       const data = await response.json();
 
       if (data.status === "OK") {
-        alert(`✅ Pedido #${data.data.id_pedido} creado correctamente.`);
+        // limpiamos el carrito
         localStorage.removeItem("carrito");
-        window.location.href = "/";
-      } else {
-        alert("❌ Error al crear el pedido: " + data.message);
+        // navegamos al ticket animado
+        navigate(`/PagoExitoso/${data.data.id_pedido}`);
       }
+
     } catch (error) {
       console.error("Error al confirmar el pedido:", error);
       alert("Ocurrió un error al procesar el pedido.");

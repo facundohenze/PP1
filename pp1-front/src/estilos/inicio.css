@@ -41,3 +41,20 @@
   width: 250px;
   height: auto;
 }
+
+/* Quitar subrayado de los <Link> que envuelven los botones */
+.buttons a,
+.buttons a:link,
+.buttons a:visited,
+.buttons a:hover,
+.buttons a:active,
+.buttons a:focus {
+  text-decoration: none;
+  color: inherit; /* mantener el color del texto dentro del botón */
+}
+
+/* Opcional: si quieres evitar el foco visible (no recomendado por accesibilidad), descomentar:
+.buttons a:focus {
+  outline: none;
+}
+*/

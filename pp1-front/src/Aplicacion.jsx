@@ -8,6 +8,7 @@ import { Edicion } from "./pages/Edicion"
 import { Edicion2 } from "./pages/Edicion2"
 import { Inicio } from "./pages/Inicio"
 import { Pago } from "./pages/Pago"
+import { PagoExitoso } from "./pages/PagoExitoso"
 
 export const Aplicacion = () => {
     return (
@@ -22,6 +23,7 @@ export const Aplicacion = () => {
                 <Route path="/Edicion2" element={<Edicion2 />} />
                 <Route path="/Pago" element={<Pago/>} />
                 <Route path="/*" element={<Navigate to='/Productos' />} />
+                <Route path="/PagoExitoso/:id_pedido" element={<PagoExitoso />} />
             </Routes>
         </Layout>
     )

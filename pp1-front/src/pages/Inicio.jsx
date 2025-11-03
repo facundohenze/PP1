@@ -28,9 +28,7 @@ export const Inicio = () => {
         </Link>
       </div>
       
-
     </div>
-
 
   )
 }

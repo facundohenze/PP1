@@ -1,0 +1,67 @@
+.pago-exitoso-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 90vh;
+  background-color: #f7f7f7;
+  color: #222;
+  text-align: center;
+  transition: all 0.5s ease;
+}
+
+/* Animación de check */
+.animacion-pago  {
+  margin-bottom: 50%;
+}
+
+.animacion-pago .checkmark {
+  font-size: 120px;
+  color: #4CAF50;
+  animation: pop 0.7s ease forwards;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  80% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.ticket-container {
+  background: white;
+  border-radius: 15px;
+  padding: 25px 40px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  width: 90%;
+  max-width: 450px;
+  text-align: left;
+  margin-bottom: 50%;
+}
+
+.ticket-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 35px;
+}
+
+.ticket-container p {
+  margin: 6px 0;
+  font-size: 25px;
+}
+
+.btn-volver {
+  display: block;
+  margin: 25px auto 0;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-volver:hover {
+  background-color: #45a049;
+}
