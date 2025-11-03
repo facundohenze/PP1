@@ -15,6 +15,7 @@ export const Pago = () => {
   const navigate = useNavigate(); // para redirigir tras el pago
   const { t } = useIdioma();
 
+
   useEffect(() => {
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     setItems(carrito);

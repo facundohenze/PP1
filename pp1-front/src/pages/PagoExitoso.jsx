@@ -7,6 +7,7 @@ export const PagoExitoso = () => {
   const navigate = useNavigate();
   const [pedido, setPedido] = useState(null);
   const [mostrarTicket, setMostrarTicket] = useState(false);
+  const modoPedido = localStorage.getItem("modoPedido");
 
   useEffect(() => {
     const fetchPedido = async () => {
@@ -44,10 +45,11 @@ export const PagoExitoso = () => {
         <div className="ticket-container">
           <h2>Ticket #{pedido.id_pedido}</h2>
           <p><strong>Fecha:</strong> {new Date(pedido.fecha_hora).toLocaleString()}</p>
-          <p><strong>Cliente:</strong> {pedido.id_cliente}</p>
+          {/* <p><strong>Cliente:</strong> {pedido.id_cliente}</p> */}
+          <p><strong>Cliente:</strong> {pedido.cliente_nombre}</p>
           <p><strong>Total:</strong> ${pedido.total}</p>
           <p><strong>Estado:</strong> {pedido.estado || "Pendiente"}</p>
-
+          <p><strong>Modo:</strong> {modoPedido}</p>
           <button className="btn-volver" onClick={volverInicio}>
             Finalizar
           </button>
