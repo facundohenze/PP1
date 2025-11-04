@@ -56,7 +56,7 @@ export const Carrito = () => {
 
                             <div className="carrito-info">
                                 <h3 className="carrito-nombre">{item.nombre}</h3>
-                                <p className="carrito-descripcion">{item.descripcion}</p>
+                                {/* <p className="carrito-descripcion">{item.descripcion}</p> */}
                                 <p className="carrito-tamaño">{item.tamano}</p>
                                 <p className="carrito-precio">{item.subtotal || item.precio}</p>
                             </div>

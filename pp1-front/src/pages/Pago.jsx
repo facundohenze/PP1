@@ -234,9 +234,9 @@ export const Pago = () => {
           </div>
         </div>
 
-        {!metodoPago && (
+{/*         {!metodoPago && (
           <p className="mensaje-seleccion">{t("selecciona_metodo")}</p>
-        )}
+        )} */}
 
         {/* 🔘 Botón dinámico según método */}
         {metodoPago && (

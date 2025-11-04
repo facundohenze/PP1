@@ -303,7 +303,7 @@
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: bold;
   transition: all 0.3s ease;
 }
@@ -325,9 +325,9 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: bold;
-  height: 40px;
+  height: 45px;
   transition: background-color 0.3s ease;
   
 }

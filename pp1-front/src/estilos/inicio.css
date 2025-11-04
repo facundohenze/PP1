@@ -9,6 +9,19 @@
     width: 600px;
     height: auto;
 }
+
+.circulos {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.circulos img {
+  width: 350px;
+  height: auto;
+  z-index: 1;   
+}
+
 .buttons {
   display: flex;
   justify-content: center; /* centra los botones */

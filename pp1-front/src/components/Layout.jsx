@@ -47,6 +47,9 @@ export const Layout = ({ children }) => {
             {mostrar1 && (
                 <header className="layout-header">
                     <img src="/imagenes/logo.png" alt="Logo" />
+                    <div className="circulos">
+                        <img src="/imagenes/Captura.PNG" alt="circulos" />
+                    </div>
                 </header>
             )}
 

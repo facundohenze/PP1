@@ -15,6 +15,9 @@ export const Inicio = () => {
       <header className="logo">
         <img src="public\imagenes\logo.png" alt="Logo" />
       </header>
+      <div className="circulos">
+        <img src="/imagenes/Captura.PNG" alt="circulos" />
+      </div>
 
       <div className="buttons">
         <Link
